@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5848425775124920296}
   - component: {fileID: 4514651799088098378}
   - component: {fileID: -1858763821213217727}
-  - component: {fileID: -8296161119163767795}
+  - component: {fileID: -2060158022301808257}
   m_Layer: 7
   m_Name: dropped_item_prefab
   m_TagString: Untagged
@@ -52,6 +52,16 @@ MonoBehaviour:
   _renderer: {fileID: 44346051386919654}
   _lifetimeSeconds: 120
   _autoDespawn: 1
+  _maxTossAngle: 20
+  _tossForceRange: {x: 10, y: 14}
+  _spinImpulseRange: {x: -3, y: 3}
+  _airDrag: 0.5
+  _angularDrag: 0.05
+  _gravityScale: 2
+  _bounceDamping: 0.5
+  _maxBounces: 2
+  _squashAmount: 0.2
+  _squashDuration: 0.08
 --- !u!50 &-1858763821213217727
 Rigidbody2D:
   serializedVersion: 5
@@ -67,7 +77,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 2
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -78,9 +88,9 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
---- !u!58 &-8296161119163767795
-CircleCollider2D:
+  m_Constraints: 0
+--- !u!61 &-2060158022301808257
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -114,7 +124,17 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &5403226441744752890
 GameObject:
   m_ObjectHideFlags: 0

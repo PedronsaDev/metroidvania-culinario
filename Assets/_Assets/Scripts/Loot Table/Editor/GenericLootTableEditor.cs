@@ -6,11 +6,9 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using _Assets.Scripts.Loot_Table;
 
 namespace _Assets.Scripts.Loot_Table.Editor
 {
-    // A single inspector that works for all GenericLootTable<,> assets via the LootTableBase base class
     [CustomEditor(typeof(LootTableBase), true)]
     [CanEditMultipleObjects]
     public class GenericLootTableEditor : UnityEditor.Editor

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using _Assets.Scripts.Loot_Tables.Table_Types;
 using UnityEngine;
 
 namespace _Assets.Scripts.Drops
@@ -13,7 +12,6 @@ namespace _Assets.Scripts.Drops
         [Header("Spawn settings")]
         [SerializeField] private GameObject _defaultPickupPrefab;
         [SerializeField, Min(0f)] private float _spawnSpreadRadius = 0.35f;
-        [SerializeField, Min(0f)] private float _tossForce = 4f;
         [SerializeField, Min(0.1f)] private float _defaultLifetimeSeconds = 120f;
         [SerializeField, Min(0f)]
         private float _perDropDelaySeconds = 0f;
@@ -24,7 +22,7 @@ namespace _Assets.Scripts.Drops
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
+            if (Instance && Instance != this)
             {
                 Destroy(gameObject);
                 return;
@@ -73,8 +71,12 @@ namespace _Assets.Scripts.Drops
             List<DroppedItem> toRemove = new List<DroppedItem>();
             foreach (DroppedItem drop in _activeDrops)
             {
-                if (!drop) { toRemove.Add(drop); continue; }
-                if ((drop.transform.position - position).sqrMagnitude <= radius * radius)
+                if (!drop)
+                {
+                    toRemove.Add(drop);
+                    continue;
+                }
+                if ((drop.transform.position - position).sqrMagnitude <= radius*radius)
                 {
                     Destroy(drop.gameObject);
                     removed++;
@@ -144,7 +146,7 @@ namespace _Assets.Scripts.Drops
 
         public GameObject SpawnLootObject(Item loot, Vector3 origin)
         {
-            var offset = (Vector3)(Random.insideUnitCircle * _spawnSpreadRadius);
+            var offset = (Vector3)(Random.insideUnitCircle*_spawnSpreadRadius);
             Vector3 spawnPos = origin + offset;
 
             GameObject goInstance = null;
@@ -154,10 +156,10 @@ namespace _Assets.Scripts.Drops
                 goInstance = Instantiate<GameObject>(_defaultPickupPrefab, spawnPos, Quaternion.identity);
                 var di = goInstance.GetComponent<DroppedItem>();
                 if (!di) di = goInstance.AddComponent<DroppedItem>();
-                di.SetDefaultsIfNeeded(_defaultLifetimeSeconds, _tossForce);
+                di.SetDefaultsIfNeeded(_defaultLifetimeSeconds);
                 di.Initialize(loot);
                 Register(di);
-                di.TryToss(_tossForce);
+                di.TryToss();
             }
             else
             {

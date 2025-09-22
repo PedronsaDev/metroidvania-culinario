@@ -1,5 +1,4 @@
-﻿using _Assets.Scripts.Loot_Table;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace _Assets.Scripts.Drops
 {
