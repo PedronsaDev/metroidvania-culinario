@@ -8,6 +8,7 @@ public class Tester : MonoBehaviour, IDamageable, IPointerDownHandler
     [SerializeField] private float _maxHealth = 100;
 
     private Dropper _dropper;
+    private DamageFlash _damageFlash;
 
     public float Health { get; set; }
     public float MaxHealth { get; set; }
@@ -17,11 +18,7 @@ public class Tester : MonoBehaviour, IDamageable, IPointerDownHandler
         Health = _health;
         MaxHealth = _maxHealth;
         _dropper = GetComponent<Dropper>();
-    }
-    private void Update()
-    {
-        if (UnityEngine.InputSystem.Keyboard.current.spaceKey.wasPressedThisFrame)
-            _dropper.TryDrop();
+        _damageFlash = GetComponent<DamageFlash>();
     }
 
     public void TakeDamage(float amount)
@@ -30,6 +27,7 @@ public class Tester : MonoBehaviour, IDamageable, IPointerDownHandler
         if (IsDead())
             Die();
 
+        _damageFlash.Flash();
         Debug.Log("Took Damage, current health: " + Health);
     }
 
@@ -42,11 +40,14 @@ public class Tester : MonoBehaviour, IDamageable, IPointerDownHandler
 
     public bool IsDead() => Health <= 0;
 
-    public void Die() => Destroy(this);
+    public void Die()
+    {
+        _dropper.TryDrop();
+        Destroy(this.gameObject);
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         TakeDamage(20);
-        _dropper.TryDrop();
     }
 }
