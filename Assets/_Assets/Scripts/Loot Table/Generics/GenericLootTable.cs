@@ -27,7 +27,7 @@ namespace _Assets.Scripts.Loot_Tables.Generics
                 {
                     if(lootDropItem.ProbabilityWeight < 0f)
                     {
-                        
+
                     }
                     else
                     {

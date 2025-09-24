@@ -80,15 +80,22 @@ namespace _Assets.Scripts.Loot_Table.Editor
         private ReorderableList BuildGuaranteedList(SerializedProperty listProp, string header)
         {
             var rl = new ReorderableList(serializedObject, listProp, true, true, true, true);
-            rl.drawHeaderCallback = rect => EditorGUI.LabelField(rect, header, EditorStyles.boldLabel);
             rl.elementHeight = EditorGUIUtility.singleLineHeight + 6;
-            rl.drawElementCallback = (rect, index, _active, _focused) =>
+            rl.headerHeight = EditorGUIUtility.singleLineHeight * 2f + 6f;
+            rl.drawHeaderCallback = rect =>
+            {
+                var titleRect = new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
+                EditorGUI.LabelField(titleRect, header, EditorStyles.boldLabel);
+
+                var colsRect = new Rect(rect.x, rect.y + EditorGUIUtility.singleLineHeight, rect.width, EditorGUIUtility.singleLineHeight);
+                DrawColumnsHeader(colsRect, showWeight: false);
+            };
+            rl.drawElementCallback = (rect, index, _, _) =>
             {
                 var element = listProp.GetArrayElementAtIndex(index);
                 rect.y += 2;
                 rect.height = EditorGUIUtility.singleLineHeight;
 
-                // Columns: Item | Min | Slider | Max
                 var itemProp = element.FindPropertyRelative("Item");
                 var quantityProp = element.FindPropertyRelative("QuantityRange");
 
@@ -100,9 +107,17 @@ namespace _Assets.Scripts.Loot_Table.Editor
         private ReorderableList BuildAdditionalList(SerializedProperty listProp, string header)
         {
             var rl = new ReorderableList(serializedObject, listProp, true, true, true, true);
-            rl.drawHeaderCallback = rect => EditorGUI.LabelField(rect, header, EditorStyles.boldLabel);
             rl.elementHeight = EditorGUIUtility.singleLineHeight + 6;
-            rl.drawElementCallback = (rect, index, _active, _focused) =>
+            rl.headerHeight = EditorGUIUtility.singleLineHeight * 2f + 6f;
+            rl.drawHeaderCallback = rect =>
+            {
+                var titleRect = new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
+                EditorGUI.LabelField(titleRect, header, EditorStyles.boldLabel);
+
+                var colsRect = new Rect(rect.x, rect.y + EditorGUIUtility.singleLineHeight, rect.width, EditorGUIUtility.singleLineHeight);
+                DrawColumnsHeader(colsRect, showWeight: true);
+            };
+            rl.drawElementCallback = (rect, index, _, _) =>
             {
                 var element = listProp.GetArrayElementAtIndex(index);
                 rect.y += 2;
@@ -117,50 +132,81 @@ namespace _Assets.Scripts.Loot_Table.Editor
             return rl;
         }
 
+        private void DrawColumnsHeader(Rect rect, bool showWeight)
+        {
+            float pad = 4f;
+            float itemWidth = rect.width * (showWeight ? 0.45f : 0.6f);
+            float minFieldWidth = 40f;
+            float dashWidth = 12f;
+            float maxFieldWidth = 40f;
+
+            var rItem = new Rect(rect.x, rect.y, itemWidth, rect.height);
+            EditorGUI.LabelField(rItem, "Item to Drop", EditorStyles.miniBoldLabel);
+
+            float afterItemX = rItem.xMax + pad;
+            if (showWeight)
+            {
+                var rWeight = new Rect(afterItemX, rect.y, 80f, rect.height);
+                EditorGUI.LabelField(rWeight, "Weight", EditorStyles.miniBoldLabel);
+                afterItemX = rWeight.xMax + pad * 2f;
+            }
+            else
+            {
+                afterItemX = rItem.xMax + pad * 2f;
+            }
+
+            var rMin = new Rect(afterItemX, rect.y, minFieldWidth, rect.height);
+            var rDash = new Rect(rMin.xMax + pad, rect.y, dashWidth, rect.height);
+            var rMax = new Rect(rDash.xMax + pad, rect.y, maxFieldWidth, rect.height);
+
+            EditorGUI.LabelField(rMin, " Min", EditorStyles.miniBoldLabel);
+            //EditorGUI.LabelField(rDash, "", EditorStyles.miniBoldLabel);
+            EditorGUI.LabelField(rMax, "Max", EditorStyles.miniBoldLabel);
+        }
+
         private void DrawItemQuantityRow(Rect rect, SerializedProperty itemProp, SerializedProperty quantityProp, bool showWeight, SerializedProperty weightProp)
         {
             float pad = 4f;
             float itemWidth = rect.width * (showWeight ? 0.45f : 0.6f);
             float minFieldWidth = 40f;
+            float dashWidth = 12f;
             float maxFieldWidth = 40f;
-            float sliderWidth = rect.width - itemWidth - (showWeight ? 80f : 0f) - minFieldWidth - maxFieldWidth - pad * 5f;
 
             // Item
             var rItem = new Rect(rect.x, rect.y, itemWidth, rect.height);
             EditorGUI.PropertyField(rItem, itemProp, GUIContent.none);
 
             // Weight
+            float afterItemX = rItem.xMax + pad;
             if (showWeight && weightProp != null)
             {
-                var rWeight = new Rect(rItem.xMax + pad, rect.y, 80f, rect.height);
+                var rWeight = new Rect(afterItemX, rect.y, 80f, rect.height);
                 EditorGUI.BeginChangeCheck();
                 float w = EditorGUI.FloatField(rWeight, weightProp.floatValue);
                 if (EditorGUI.EndChangeCheck())
                 {
                     weightProp.floatValue = Mathf.Max(0f, w);
                 }
+                afterItemX = rWeight.xMax + pad * 2f;
+            }
+            else
+            {
+                afterItemX = rItem.xMax + pad * 2f;
             }
 
-            var rMin = new Rect(rect.x + itemWidth + (showWeight ? 80f : 0f) + pad * 2f, rect.y, minFieldWidth, rect.height);
-            var rSlider = new Rect(rMin.xMax + pad, rect.y + 2, sliderWidth, rect.height - 4);
-            var rMax = new Rect(rSlider.xMax + pad, rect.y, maxFieldWidth, rect.height);
+            var rMin = new Rect(afterItemX, rect.y, minFieldWidth, rect.height);
+            var rDash = new Rect(rMin.xMax + pad, rect.y, dashWidth, rect.height);
+            var rMax = new Rect(rDash.xMax + pad, rect.y, maxFieldWidth, rect.height);
 
             var minProp = quantityProp.FindPropertyRelative("x");
             var maxProp = quantityProp.FindPropertyRelative("y");
-            int min = minProp.intValue;
-            int max = maxProp.intValue;
 
             EditorGUI.BeginChangeCheck();
-            int minField = EditorGUI.IntField(rMin, min);
-            float fMin = min;
-            float fMax = max;
-            EditorGUI.MinMaxSlider(rSlider, ref fMin, ref fMax, 1f, 10f);
-            int maxField = EditorGUI.IntField(rMax, max);
+            int newMin = EditorGUI.IntField(rMin, minProp.intValue);
+            EditorGUI.LabelField(rDash, "-");
+            int newMax = EditorGUI.IntField(rMax, maxProp.intValue);
             if (EditorGUI.EndChangeCheck())
             {
-                int newMin = minField != min || maxField != max ? minField : Mathf.RoundToInt(fMin);
-                int newMax = minField != min || maxField != max ? maxField : Mathf.RoundToInt(fMax);
-
                 newMin = Mathf.Clamp(newMin, 1, 10);
                 newMax = Mathf.Clamp(newMax, 1, 10);
                 if (newMax < newMin) newMax = newMin;
