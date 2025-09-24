@@ -26,3 +26,8 @@ MonoBehaviour:
     QuantityRange: {x: 1, y: 1}
     ProbabilityRangeFrom: 1
     ProbabilityRangeTo: 4
+  - Item: {fileID: 11400000, guid: 77df7845032aa7c498b71592d911444d, type: 2}
+    ProbabilityWeight: 3
+    QuantityRange: {x: 1, y: 1}
+    ProbabilityRangeFrom: 4
+    ProbabilityRangeTo: 7

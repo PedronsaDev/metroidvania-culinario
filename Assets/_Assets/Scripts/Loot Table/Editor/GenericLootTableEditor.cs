@@ -39,7 +39,6 @@ namespace _Assets.Scripts.Loot_Table.Editor
 
             serializedObject.Update();
 
-            // GUARANTEED
             using (new EditorGUILayout.VerticalScope(_boxStyle))
             {
                 _guaranteedList.DoLayoutList();
@@ -47,7 +46,6 @@ namespace _Assets.Scripts.Loot_Table.Editor
 
             EditorGUILayout.Space(6);
 
-            // ADDITIONAL (WEIGHTED)
             using (new EditorGUILayout.VerticalScope(_boxStyle))
             {
                 _additionalList.DoLayoutList();
@@ -74,7 +72,6 @@ namespace _Assets.Scripts.Loot_Table.Editor
 
             if (serializedObject.ApplyModifiedProperties())
             {
-                // Recalculate ranges as you edit
                 InvokeValidateTable();
                 EditorUtility.SetDirty(target);
             }
@@ -144,7 +141,6 @@ namespace _Assets.Scripts.Loot_Table.Editor
                 }
             }
 
-            // Min/Max fields and slider
             var rMin = new Rect(rect.x + itemWidth + (showWeight ? 80f : 0f) + pad * 2f, rect.y, minFieldWidth, rect.height);
             var rSlider = new Rect(rMin.xMax + pad, rect.y + 2, sliderWidth, rect.height - 4);
             var rMax = new Rect(rSlider.xMax + pad, rect.y, maxFieldWidth, rect.height);
@@ -162,7 +158,6 @@ namespace _Assets.Scripts.Loot_Table.Editor
             int maxField = EditorGUI.IntField(rMax, max);
             if (EditorGUI.EndChangeCheck())
             {
-                // Prefer text fields if changed, otherwise use slider values
                 int newMin = minField != min || maxField != max ? minField : Mathf.RoundToInt(fMin);
                 int newMax = minField != min || maxField != max ? maxField : Mathf.RoundToInt(fMax);
 
@@ -185,7 +180,6 @@ namespace _Assets.Scripts.Loot_Table.Editor
                 return;
             }
 
-            // Compute total positive weight
             float total = 0f;
             for (int i = 0; i < _additionalProp.arraySize; i++)
             {
@@ -200,7 +194,6 @@ namespace _Assets.Scripts.Loot_Table.Editor
                 return;
             }
 
-            // Progress bars per item
             for (int i = 0; i < _additionalProp.arraySize; i++)
             {
                 var el = _additionalProp.GetArrayElementAtIndex(i);
@@ -250,12 +243,10 @@ namespace _Assets.Scripts.Loot_Table.Editor
             }
             var order = items.OrderByDescending(t => t.weight).Select(t => t.index).ToList();
 
-            // Reorder array by moving elements to match sorted order
             for (int sortedPos = 0; sortedPos < order.Count; sortedPos++)
             {
                 int currentIndex = order[sortedPos];
                 _additionalProp.MoveArrayElement(currentIndex, sortedPos);
-                // adjust indices because MoveArrayElement changes positions
                 for (int j = sortedPos + 1; j < order.Count; j++)
                 {
                     if (order[j] < currentIndex) order[j]++;
@@ -271,9 +262,8 @@ namespace _Assets.Scripts.Loot_Table.Editor
             {
                 var obj = itemProp.objectReferenceValue;
                 if (obj != null) return obj.name;
-                return "<None>";
+                return "Nothing";
             }
-            // Fallback: show property display name or element index
             return itemProp.displayName;
         }
 
@@ -286,7 +276,7 @@ namespace _Assets.Scripts.Loot_Table.Editor
             }
             catch (Exception)
             {
-                // ignore; validation is best-effort
+                // Ignore
             }
         }
     }

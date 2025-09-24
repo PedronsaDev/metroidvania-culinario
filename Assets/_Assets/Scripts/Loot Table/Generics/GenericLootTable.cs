@@ -27,7 +27,7 @@ namespace _Assets.Scripts.Loot_Tables.Generics
                 {
                     if(lootDropItem.ProbabilityWeight < 0f)
                     {
-                        // keep zero/negative as non-contributing
+                        
                     }
                     else
                     {
@@ -71,9 +71,13 @@ namespace _Assets.Scripts.Loot_Tables.Generics
             {
                 if (pickedNumber > lootDropItem.ProbabilityRangeFrom && pickedNumber < lootDropItem.ProbabilityRangeTo)
                 {
+                    if (lootDropItem.Item == null)
+                        break;
+
                     int quantity = Random.Range(lootDropItem.QuantityRange.x, lootDropItem.QuantityRange.y + 1);
                     for (int i = 0; i < quantity; i++)
                         selectedDrops.Add(lootDropItem.Item);
+
                     break;
                 }
             }
