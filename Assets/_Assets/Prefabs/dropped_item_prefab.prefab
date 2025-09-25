@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7995603270639897346}
-  - component: {fileID: 3668416065665141165}
+  - component: {fileID: 681835712465486698}
   m_Layer: 8
   m_Name: Trigger
   m_TagString: Untagged
@@ -32,8 +32,8 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5848425775124920296}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &3668416065665141165
-BoxCollider2D:
+--- !u!58 &681835712465486698
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -67,17 +67,7 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Radius: 1
 --- !u!1 &5056880306916180259
 GameObject:
   m_ObjectHideFlags: 0
@@ -108,7 +98,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3661951680997557090}
@@ -419,21 +409,21 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.44366264
-        inSlope: 0
-        outSlope: 0
+        value: 0.24825954
+        inSlope: -0.009135733
+        outSlope: -0.009135733
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.33333334
+        outWeight: 0.12453453
       - serializedVersion: 3
-        time: 0.97529626
+        time: 0.99595666
         value: 0
-        inSlope: -0.7758369
-        outSlope: -0.7758369
+        inSlope: -0.5848821
+        outSlope: -0.5848821
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0.15821718
+        inWeight: 0.12825826
         outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2

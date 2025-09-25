@@ -87,21 +87,19 @@ public class InteractionHintUI : MonoBehaviour
 
     private void Show()
     {
-        if (_panel && !_panel.gameObject.activeSelf)
+        DOTween.Kill(this);
+        if (_panel)
         {
-            _panel.gameObject.SetActive(true);
-            _canvasGroup.DOFade(1f, 0.25f);
+            _canvasGroup.DOFade(1f, 0.15f);
         }
     }
 
     private void Hide()
     {
-        if (_panel && _panel.gameObject.activeSelf)
+        DOTween.Kill(this);
+        if (_panel)
         {
-            _canvasGroup.DOFade(0f, 0.25f).OnComplete(() =>
-            {
-                _panel.gameObject.SetActive(false);
-            });
+            _canvasGroup.DOFade(0f, 0.15f);
         }
         _currentHintMeta = null;
     }
