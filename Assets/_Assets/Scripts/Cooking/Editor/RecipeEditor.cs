@@ -8,6 +8,9 @@ using UnityEngine;
 [CanEditMultipleObjects]
 public class RecipeEditor : Editor
 {
+    private SerializedProperty _displayName;
+    private SerializedProperty _description;
+
     private SerializedProperty _resultItem;
     private SerializedProperty _resultQuantity;
     private SerializedProperty _ingredients;
@@ -25,6 +28,9 @@ public class RecipeEditor : Editor
 
     private void OnEnable()
     {
+        _displayName     = serializedObject.FindProperty("DisplayName");
+        _description     = serializedObject.FindProperty("Description");
+
         _resultItem      = serializedObject.FindProperty("_resultItem");
         _resultQuantity  = serializedObject.FindProperty("_resultQuantity");
         _ingredients     = serializedObject.FindProperty("_ingredients");
@@ -80,6 +86,21 @@ public class RecipeEditor : Editor
         serializedObject.Update();
 
         DrawHeaderBar();
+        EditorGUILayout.Space(4);
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("Recipe Info", _headerStyle);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(_displayName, new GUIContent("Display Name"));
+
+            EditorGUILayout.LabelField("Description");
+            var newDesc = EditorGUILayout.TextArea(_description.stringValue, GUILayout.MinHeight(60));
+            if (newDesc != _description.stringValue)
+                _description.stringValue = newDesc;
+            EditorGUI.indentLevel--;
+        }
+
         EditorGUILayout.Space(4);
 
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))

@@ -104,28 +104,46 @@ namespace _Assets.Scripts.Drops
             {
                 objectLoot.ValidateTable();
                 List<Item> results = objectLoot.GetLootDropItem(dropper.LuckModifier);
-                if (results == null || results.Count == 0)
-                    return;
 
                 Vector3 origin = dropper.DropOrigin ? dropper.DropOrigin.position : Vector3.zero;
 
-                if (perDropDelaySeconds <= 0f)
-                {
-                    foreach (Item loot in results)
-                    {
-                        if (!loot) continue;
-                        SpawnLootObject(loot, origin);
-                    }
-                }
-                else
-                {
-                    StartCoroutine(DropSequence(results, origin, perDropDelaySeconds));
-                }
+                StartDropSequence(results, origin, perDropDelaySeconds);
             }
             else
             {
                 Debug.LogWarning($"[DROP MANAGER] Unsupported loot table type: {dropper.LootTable.GetType().Name}. Only ObjectLootTable is supported by default. You can extend DropManager to handle your type.");
             }
+        }
+
+        public void StartDropSequence(List<Item> items, Vector3 origin, float perDropDelaySeconds)
+        {
+            if (items == null || items.Count == 0)
+                return;
+
+            if (perDropDelaySeconds <= 0f)
+            {
+                foreach (Item loot in items)
+                {
+                    if (!loot) continue;
+                    SpawnLootObject(loot, origin);
+                }
+            }
+            else
+            {
+                StartCoroutine(DropSequence(items, origin, perDropDelaySeconds));
+            }
+        }
+
+        public void StartDropSequence(Item item, int count, Vector3 origin)
+        {
+            if (!item)
+                return;
+
+            if (count > 1)
+                StartCoroutine(DropSequence(item, count, origin, 0.25f));
+            else
+                SpawnLootObject(item, origin);
+
         }
 
         private IEnumerator DropSequence(List<Item> items, Vector3 origin, float perDropDelaySeconds)
@@ -144,26 +162,43 @@ namespace _Assets.Scripts.Drops
             }
         }
 
+        private IEnumerator DropSequence(Item item, int count, Vector3 origin, float perDropDelaySeconds)
+        {
+            bool useUnscaled = _useUnscaledTimeForDelay;
+            YieldInstruction wait = new WaitForSeconds(perDropDelaySeconds);
+
+            for (int i = 0; i < count; i++)
+            {
+                SpawnLootObject(item, origin);
+
+                if (i < count - 1)
+                    yield return wait;
+            }
+        }
+
         public GameObject SpawnLootObject(Item loot, Vector3 origin)
         {
-            var offset = (Vector3)(Random.insideUnitCircle*_spawnSpreadRadius);
+            var offset = (Vector3)(Random.insideUnitCircle * _spawnSpreadRadius);
             Vector3 spawnPos = origin + offset;
 
             GameObject goInstance = null;
 
             if (_defaultPickupPrefab)
             {
-                goInstance = Instantiate<GameObject>(_defaultPickupPrefab, spawnPos, Quaternion.identity);
+                goInstance = Instantiate(_defaultPickupPrefab, spawnPos, Quaternion.identity);
                 var di = goInstance.GetComponent<DroppedItem>();
                 if (!di) di = goInstance.AddComponent<DroppedItem>();
                 di.SetDefaultsIfNeeded(_defaultLifetimeSeconds);
                 di.Initialize(loot);
                 Register(di);
                 di.TryToss();
+
+                var pickup = goInstance.GetComponent<InteractablePickup>();
+                if (!pickup) pickup = goInstance.AddComponent<InteractablePickup>();
             }
             else
             {
-                Debug.LogWarning($"[DropManager] Can't spawn loot of type {loot.GetType().Name} because it's not a GameObject and no defaultPickupPrefab is configured.");
+                Debug.LogWarning($"[DropManager] Can't spawn loot {loot.name} because no defaultPickupPrefab is configured.");
             }
 
             return goInstance;

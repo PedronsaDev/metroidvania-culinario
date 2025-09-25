@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ca35b9d470614d41b727d71ec369285, type: 3}
-  m_Name: test_item_1
+  m_Name: test_item_5
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  DisplayName: Maca
-  Icon: {fileID: 21300000, guid: 8fa37c2c8b9bd654c96a4fae10f387a1, type: 3}
-  Description: Uhmmm...
+  DisplayName: Sopa leguminosa
+  Icon: {fileID: 21300000, guid: 2ba14b7e3cc2e8942b9c3a3ed3238fd5, type: 3}
+  Description: Uma sopa extremamente terrosa

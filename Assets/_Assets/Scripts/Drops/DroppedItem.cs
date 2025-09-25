@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿// File: Assets/_Assets/Scripts/Drops/DroppedItem.cs
+using System.Collections;
 using UnityEngine;
 
 namespace _Assets.Scripts.Drops
@@ -8,7 +9,6 @@ namespace _Assets.Scripts.Drops
         public Item Payload;
 
         [SerializeField] private SpriteRenderer _renderer;
-
         [SerializeField, Min(0.1f)] private float _lifetimeSeconds = 120f;
         [SerializeField] private bool _autoDespawn = true;
 
@@ -25,20 +25,22 @@ namespace _Assets.Scripts.Drops
         [SerializeField, Min(0.01f)] private float _squashDuration = 0.08f;
 
         private float _timeAlive;
-
         private bool _tossed;
         private int _bounces;
         private Vector3 _baseScale;
         private Coroutine _squashRoutine;
         private Rigidbody2D _rb2d;
+        private bool _landed;
+
+        public bool IsPickable => !_tossed && _landed;
 
         private void OnEnable()
         {
             _rb2d = GetComponent<Rigidbody2D>();
-
             _timeAlive = 0f;
             _tossed = false;
             _bounces = 0;
+            _landed = false;
             _baseScale = transform.localScale;
             DropManager.GetOrCreate().Register(this);
         }
@@ -59,7 +61,7 @@ namespace _Assets.Scripts.Drops
         public void Initialize(Item payload)
         {
             Payload = payload;
-            _renderer.sprite = payload.Icon;
+            if (_renderer) _renderer.sprite = payload.Icon;
         }
 
         public void SetDefaultsIfNeeded(float defaultLifetime)
@@ -72,9 +74,7 @@ namespace _Assets.Scripts.Drops
             if (!_autoDespawn) return;
             _timeAlive += Time.deltaTime;
             if (_timeAlive >= _lifetimeSeconds)
-            {
                 Destroy(gameObject);
-            }
         }
 
         public void TryToss()
@@ -97,13 +97,17 @@ namespace _Assets.Scripts.Drops
 
                 _tossed = true;
                 _bounces = 0;
-                return;
+                _landed = false;
             }
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (!_tossed) return;
+            if (collision.gameObject.layer != LayerMask.NameToLayer("Ground"))
+                return;
+
+            if (!_tossed)
+                return;
 
             if (_rb2d)
             {
@@ -119,16 +123,15 @@ namespace _Assets.Scripts.Drops
             if (_bounces >= _maxBounces)
             {
                 _tossed = false;
+                _landed = true;
             }
         }
 
         private void PlaySquash()
         {
             if (_squashAmount <= 0f) return;
-
             if (_squashRoutine != null)
                 StopCoroutine(_squashRoutine);
-
             _squashRoutine = StartCoroutine(SquashStretch());
         }
 
@@ -166,9 +169,6 @@ namespace _Assets.Scripts.Drops
         }
 
         [ContextMenu("Despawn Now")]
-        public void DespawnNow()
-        {
-            Destroy(gameObject);
-        }
+        public void DespawnNow() => Destroy(gameObject);
     }
 }

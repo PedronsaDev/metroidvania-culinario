@@ -6,6 +6,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "new_recipe", menuName = "Cooking/New Recipe")]
 public class Recipe : ScriptableObject
 {
+    [Header("Recipe Info")]
+    [SerializeField] private string DisplayName = "New Recipe";
+    [SerializeField , ResizableTextArea]
+    private string Description = "Describe the recipe here.";
+
     [Header("Result")]
     [SerializeField] private Item _resultItem;
     [SerializeField] private int _resultQuantity = 1;
@@ -17,6 +22,9 @@ public class Recipe : ScriptableObject
     [SerializeField] private bool _startUnlocked = false;
     [SerializeField, Tooltip("Optional stable ID for save/persistence; leave blank to auto-generate."), ReadOnly]
     private string _persistentId;
+
+    public string Name => string.IsNullOrWhiteSpace(DisplayName) ? "New Recipe" : DisplayName;
+    public string Info => string.IsNullOrWhiteSpace(Description) ? "Describe the recipe here." : Description;
 
     public Item ResultItem => _resultItem;
     public int ResultQuantity => _resultQuantity < 1 ? 1 : _resultQuantity;

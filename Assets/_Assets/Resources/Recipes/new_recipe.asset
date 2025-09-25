@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fda878cdefea2a64985ad553f164f11e, type: 3}
+  m_Name: new_recipe
+  m_EditorClassIdentifier: Assembly-CSharp::Recipe
+  DisplayName: Sopa da vovo
+  Description: Sopa de legumes insana
+  _resultItem: {fileID: 11400000, guid: 03462cd832aa7c344b9f5685e7f4ce83, type: 2}
+  _resultQuantity: 1
+  _ingredients: []
+  _startUnlocked: 0
+  _persistentId: 09176ed9001c445f83abd0ec4c5a7b3f

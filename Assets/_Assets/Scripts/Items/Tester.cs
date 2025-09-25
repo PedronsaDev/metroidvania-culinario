@@ -28,7 +28,7 @@ public class Tester : MonoBehaviour, IDamageable, IPointerDownHandler
             Die();
 
         _damageFlash.Flash();
-        Debug.Log("Took Damage, current health: " + Health);
+        //Debug.Log("Took Damage, current health: " + Health);
     }
 
     public void Heal(float amount)

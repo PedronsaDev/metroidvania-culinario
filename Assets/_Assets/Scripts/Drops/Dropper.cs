@@ -24,8 +24,12 @@ namespace _Assets.Scripts.Drops
 
         private void OnDisable()
         {
-            if (_applicationQuitting) return;
-            if (!_dropOnDisable) return;
+            if (_applicationQuitting)
+                return;
+            
+            if (!_dropOnDisable)
+                return;
+
             TryDrop();
         }
 
