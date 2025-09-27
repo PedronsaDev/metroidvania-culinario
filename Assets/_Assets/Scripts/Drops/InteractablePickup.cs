@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using System;
+using DG.Tweening;
 using UnityEngine;
 using _Assets.Scripts.Drops;
 
@@ -14,6 +15,7 @@ public class InteractablePickup : InteractableBase
     [SerializeField] private bool _autoPickupOnEnter = true;
     [SerializeField] private LayerMask _collectorMask;
     [SerializeField] private bool _onlyPickupIfInventoryAccepts = true;
+    [SerializeField] private float _pickupRadius = 0.6f;
 
     private bool _collected;
 
@@ -22,12 +24,50 @@ public class InteractablePickup : InteractableBase
         if (!_dropped) _dropped = GetComponent<DroppedItem>();
         if (_autoSetNameFromItem && _dropped && _dropped.Payload)
             _displayName = _dropped.Payload.name;
+
+        GetComponentInChildren<CircleCollider2D>().radius = _pickupRadius;
+    }
+
+    private void Start()
+    {
+        _dropped.OnCanBePickedUp += OnCanBePickedUp;
+    }
+
+    private void OnDestroy()
+    {
+        if (_dropped)
+            _dropped.OnCanBePickedUp -= OnCanBePickedUp;
+    }
+
+    private void OnCanBePickedUp()
+    {
+        if (!_autoPickupOnEnter || _collected || !_dropped)
+            return;
+        if (!_dropped.IsPickable)
+            return;
+        Collider2D hit = Physics2D.OverlapCircle(transform.position, _pickupRadius, _collectorMask);
+
+        if (!hit)
+            return;
+
+        hit.TryGetComponent<IItemCollector>(out var collector);
+
+        if (_onlyPickupIfInventoryAccepts && (collector == null || !collector.CanAccept(_dropped.Payload, _quantity)))
+            return;
+
+        var ctx = new InteractionContext(hit.gameObject, (Vector2)transform.position, Time.time);
+        Interact(in ctx);
+
     }
 
     public override bool CanInteract(in InteractionContext context)
     {
-        if (_collected || !_dropped || !_dropped.Payload) return false;
-        if (!_dropped.IsPickable) return false;
+        if (_collected || !_dropped || !_dropped.Payload)
+            return false;
+
+        if (!_dropped.IsPickable)
+            return false;
+
         return IsEnabled;
     }
 
@@ -53,10 +93,10 @@ public class InteractablePickup : InteractableBase
 
         if (_destroyOnPickup && _dropped)
         {
-            transform.DOMove(context.Initiator.transform.position, 0.15f).SetEase(Ease.InBack).OnComplete(() =>
-            {
-                Destroy(_dropped.gameObject);
-            });
+
+            transform.DOJump(context.Initiator.transform.position, 0.5f, 1, 0.25f)
+                .SetEase(Ease.InCubic)
+                .OnComplete(() => Destroy(_dropped.gameObject));
         }
         else
         {
@@ -71,14 +111,26 @@ public class InteractablePickup : InteractableBase
 
         if (!_dropped.IsPickable)
             return;
+
         if (((1 << other.gameObject.layer) & _collectorMask) == 0)
             return;
 
         var collector = other.GetComponent<IItemCollector>();
+
         if (_onlyPickupIfInventoryAccepts && (collector == null || !collector.CanAccept(_dropped.Payload, _quantity)))
             return;
 
         var ctx = new InteractionContext(other.gameObject, (Vector2)transform.position, Time.time);
         Interact(in ctx);
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, _pickupRadius);
+    }
+
+  #endif
+
 }

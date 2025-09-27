@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7995603270639897346}
   - component: {fileID: 681835712465486698}
   m_Layer: 8
-  m_Name: Trigger
+  m_Name: Pickup Range
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67,7 +67,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 1
+  m_Radius: 0.0001
 --- !u!1 &5056880306916180259
 GameObject:
   m_ObjectHideFlags: 0
@@ -78,9 +78,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5848425775124920296}
   - component: {fileID: 4514651799088098378}
+  - component: {fileID: -143847707023087321}
   - component: {fileID: -1858763821213217727}
   - component: {fileID: -2060158022301808257}
-  - component: {fileID: -143847707023087321}
   m_Layer: 7
   m_Name: dropped_item_prefab
   m_TagString: Untagged
@@ -132,6 +132,31 @@ MonoBehaviour:
   _maxBounces: 2
   _squashAmount: 0.2
   _squashDuration: 0.08
+--- !u!114 &-143847707023087321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5056880306916180259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b92cd6d11e024c2585d4641ce9c7d3ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractablePickup
+  _displayName: 
+  _priority: 0
+  _enabled: 1
+  _dropped: {fileID: 0}
+  _quantity: 1
+  _destroyOnPickup: 1
+  _autoSetNameFromItem: 0
+  _autoPickupOnEnter: 1
+  _collectorMask:
+    serializedVersion: 2
+    m_Bits: 512
+  _onlyPickupIfInventoryAccepts: 1
+  _pickupRadius: 0.75
 --- !u!50 &-1858763821213217727
 Rigidbody2D:
   serializedVersion: 5
@@ -205,30 +230,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &-143847707023087321
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5056880306916180259}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b92cd6d11e024c2585d4641ce9c7d3ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractablePickup
-  _displayName: 
-  _priority: 0
-  _enabled: 1
-  _dropped: {fileID: 0}
-  _quantity: 1
-  _destroyOnPickup: 1
-  _autoSetNameFromItem: 0
-  _autoPickupOnEnter: 1
-  _collectorMask:
-    serializedVersion: 2
-    m_Bits: 512
-  _onlyPickupIfInventoryAccepts: 1
 --- !u!1 &5403226441744752890
 GameObject:
   m_ObjectHideFlags: 0

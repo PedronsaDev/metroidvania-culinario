@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public static class RecipesManager
 {
@@ -38,12 +39,13 @@ public static class RecipesManager
 
     private static void EnsureInitialized()
     {
-        if (_initialized) return;
+        if (_initialized)
+            return;
 
         if (!_database)
         {
+            _database = Resources.Load<RecipesDatabase>("Recipes/Database/recipes_database");
 
-            _database = Resources.Load<RecipesDatabase>("Recipes/Database");
             if (!_database)
             {
                 Debug.LogWarning("RecipesManager: Recipes database missing.");
@@ -88,7 +90,9 @@ public static class RecipesManager
 
         if (!_unlocked.Add(recipe))
             return false;
+
         OnRecipeUnlocked?.Invoke(recipe);
+
         return true;
     }
 

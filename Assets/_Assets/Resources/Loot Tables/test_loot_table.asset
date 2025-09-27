@@ -14,20 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemLootTable
   _garanteedItems:
   - Item: {fileID: 11400000, guid: 1e42133a792b8c84182327ced7003876, type: 2}
-    QuantityRange: {x: 1, y: 3}
-  _additionalItems:
-  - Item: {fileID: 11400000, guid: 77df7845032aa7c498b71592d911444d, type: 2}
-    ProbabilityWeight: 33.333332
-    QuantityRange: {x: 1, y: 1}
-    ProbabilityRangeFrom: 0
-    ProbabilityRangeTo: 33.333332
+    QuantityRange: {x: 3, y: 3}
   - Item: {fileID: 11400000, guid: beb3aba1cf8e0c340bbcf8bc5d1c0879, type: 2}
-    ProbabilityWeight: 33.333332
-    QuantityRange: {x: 1, y: 1}
-    ProbabilityRangeFrom: 33.333332
-    ProbabilityRangeTo: 66.666664
-  - Item: {fileID: 0}
-    ProbabilityWeight: 33.333332
-    QuantityRange: {x: 1, y: 1}
-    ProbabilityRangeFrom: 66.666664
-    ProbabilityRangeTo: 100
+    QuantityRange: {x: 3, y: 3}
+  - Item: {fileID: 11400000, guid: 77df7845032aa7c498b71592d911444d, type: 2}
+    QuantityRange: {x: 3, y: 3}
+  _additionalItems: []

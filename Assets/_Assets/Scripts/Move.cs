@@ -3,42 +3,44 @@ using UnityEngine.InputSystem;
 
 public class Move : MonoBehaviour
 {
+    private static readonly int _magnitude = Animator.StringToHash("Magnitude");
+
     public Rigidbody2D rb;
     public Animator animator;
+
     [SerializeField] private float velocidade = 5f;
 
-    private float horizontalMove;
+    private float _rawHorizontal;
+    private float _appliedHorizontal;
 
     void Awake()
     {
-       
-        if (rb == null) rb = GetComponent<Rigidbody2D>();
-        if (animator == null) animator = GetComponent<Animator>();
+        if (!rb)
+            rb = GetComponent<Rigidbody2D>();
+        if (!animator)
+            animator = GetComponent<Animator>();
     }
 
     void Update()
     {
-      
-        rb.linearVelocity = new Vector2(horizontalMove * velocidade, rb.linearVelocity.y);
+        bool blocked = UIManager.Instance && UIManager.Instance.IsGameplayBlocked;
+        _appliedHorizontal = blocked ? 0f : _rawHorizontal;
 
-        
-        float magnitude = Mathf.Abs(rb.linearVelocity.x); 
-        animator.SetFloat("Magnitude", magnitude);
+        var v = rb.linearVelocity;
+        v.x = _appliedHorizontal*velocidade;
+        rb.linearVelocity = v;
 
-       
-        if (horizontalMove > 0.01f)
-        {
-            transform.localScale = new Vector3(1, 1, 1); 
-        }
-        else if (horizontalMove < -0.01f)
-        {
+        float magnitude = Mathf.Abs(v.x);
+        animator.SetFloat(_magnitude, magnitude);
+
+        if (_appliedHorizontal > 0.01f)
+            transform.localScale = new Vector3(1, 1, 1);
+        else if (_appliedHorizontal < -0.01f)
             transform.localScale = new Vector3(-1, 1, 1);
-        }
     }
 
     public void Movement(InputAction.CallbackContext context)
     {
-        horizontalMove = context.ReadValue<Vector2>().x;
+        _rawHorizontal = context.ReadValue<Vector2>().x;
     }
 }
-

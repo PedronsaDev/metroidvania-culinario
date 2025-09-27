@@ -4,7 +4,7 @@ using NaughtyAttributes;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "new_recipe", menuName = "Cooking/New Recipe")]
-public class Recipe : ScriptableObject
+public partial class Recipe : ScriptableObject
 {
     [Header("Recipe Info")]
     [SerializeField] private string DisplayName = "New Recipe";
@@ -31,6 +31,7 @@ public class Recipe : ScriptableObject
     public bool StartUnlocked => _startUnlocked;
     public string PersistentId => string.IsNullOrWhiteSpace(_persistentId) ? name : _persistentId;
     public IReadOnlyList<Ingredient> Ingredients => _ingredients;
+
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -68,4 +69,10 @@ public class Recipe : ScriptableObject
         UnityEditor.EditorUtility.SetDirty(this);
     }
 #endif
+}
+
+public partial class Recipe
+{
+    public bool CanCook(IInventory inventory) =>
+        inventory != null && inventory.HasIngredients(Ingredients);
 }

@@ -86,6 +86,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Inventory",
+                    "type": "Button",
+                    "id": "f4f53b40-82b9-48c2-9e9c-e2da7381f5a8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -473,6 +482,17 @@
                     "action": "Crouch",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7c6c9d6d-a3ce-4ba3-9691-46719f931bd4",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Inventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -493,7 +513,7 @@
                     "name": "Submit",
                     "type": "Button",
                     "id": "7607c7b6-cd76-4816-beef-bd0341cfe950",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -502,7 +522,7 @@
                     "name": "Cancel",
                     "type": "Button",
                     "id": "15cef263-9014-4fd5-94d9-4e4a6234a6ef",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false

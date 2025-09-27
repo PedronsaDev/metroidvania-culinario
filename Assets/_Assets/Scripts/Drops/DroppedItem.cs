@@ -1,6 +1,7 @@
-﻿// File: Assets/_Assets/Scripts/Drops/DroppedItem.cs
+﻿using System;
 using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace _Assets.Scripts.Drops
 {
@@ -31,6 +32,7 @@ namespace _Assets.Scripts.Drops
         private Coroutine _squashRoutine;
         private Rigidbody2D _rb2d;
         private bool _landed;
+        public event Action OnCanBePickedUp;
 
         public bool IsPickable => !_tossed && _landed;
 
@@ -73,8 +75,15 @@ namespace _Assets.Scripts.Drops
         {
             if (!_autoDespawn) return;
             _timeAlive += Time.deltaTime;
+
             if (_timeAlive >= _lifetimeSeconds)
                 Destroy(gameObject);
+
+            if (_timeAlive >= 3f)
+            {
+                _tossed = false;
+                _landed = true;
+            }
         }
 
         public void TryToss()
@@ -124,6 +133,8 @@ namespace _Assets.Scripts.Drops
             {
                 _tossed = false;
                 _landed = true;
+
+                OnCanBePickedUp?.Invoke();
             }
         }
 

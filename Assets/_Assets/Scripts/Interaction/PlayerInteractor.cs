@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,12 +15,20 @@ public class PlayerInteractor : MonoBehaviour, IItemCollector
     [Header("Timing")]
     [SerializeField] private float _cooldown = 0.25f;
 
+    private PlayerInventory _inventory;
+
     private readonly List<IInteractable> _candidates = new();
     private float _nextAllowed;
     public IInteractable Current { get; private set; }
 
     public event System.Action<IInteractable> HoverChanged;
     public event System.Action<IInteractable> Interacted;
+
+
+    private void Awake()
+    {
+        _inventory = GetComponent<PlayerInventory>();
+    }
 
     private void OnEnable()
     {
@@ -86,6 +95,6 @@ public class PlayerInteractor : MonoBehaviour, IItemCollector
 
     public void AddItem(Item item, int quantity)
     {
-        Debug.Log("Collected " + quantity + " x " + item.name);
+        _inventory.AddItem(item, quantity);
     }
 }

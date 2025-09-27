@@ -81,7 +81,7 @@ public class InteractionHintUI : MonoBehaviour
             return;
         }
 
-        _panel.gameObject.SetActive(true);
+        //_panel.gameObject.SetActive(true);
         _panel.position = screenPos + (Vector3)_screenOffset;
     }
 
