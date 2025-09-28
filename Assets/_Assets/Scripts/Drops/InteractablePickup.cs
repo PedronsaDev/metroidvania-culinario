@@ -28,12 +28,12 @@ public class InteractablePickup : InteractableBase
         GetComponentInChildren<CircleCollider2D>().radius = _pickupRadius;
     }
 
-    private void Start()
+    private void OnEnable()
     {
         _dropped.OnCanBePickedUp += OnCanBePickedUp;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         if (_dropped)
             _dropped.OnCanBePickedUp -= OnCanBePickedUp;
@@ -96,7 +96,7 @@ public class InteractablePickup : InteractableBase
 
             transform.DOJump(context.Initiator.transform.position, 0.5f, 1, 0.25f)
                 .SetEase(Ease.InCubic)
-                .OnComplete(() => Destroy(_dropped.gameObject));
+                .OnComplete(() => ObjectPoolManager.ReturnObjectToPool(this.gameObject));
         }
         else
         {
@@ -133,4 +133,12 @@ public class InteractablePickup : InteractableBase
 
   #endif
 
+    public void Reset()
+    {
+        _quantity = 1;
+        _destroyOnPickup = true;
+        _autoPickupOnEnter = true;
+        _onlyPickupIfInventoryAccepts = true;
+        _collected = false;
+    }
 }

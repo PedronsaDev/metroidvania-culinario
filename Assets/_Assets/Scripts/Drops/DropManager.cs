@@ -27,6 +27,7 @@ namespace _Assets.Scripts.Drops
                 Destroy(gameObject);
                 return;
             }
+
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
@@ -44,7 +45,7 @@ namespace _Assets.Scripts.Drops
                 return Instance;
             }
 
-            GameObject go = new GameObject("[DROP MANAGER]");
+            GameObject go = new("[DROP MANAGER]");
             DropManager mgr = go.AddComponent<DropManager>();
             DontDestroyOnLoad(go);
 
@@ -100,7 +101,7 @@ namespace _Assets.Scripts.Drops
                 return;
             }
 
-            if (dropper.LootTable is ItemLootTable objectLoot)
+            if (dropper.LootTable is { } objectLoot)
             {
                 objectLoot.ValidateTable();
                 List<Item> results = objectLoot.GetLootDropItem(dropper.LuckModifier);
@@ -148,7 +149,6 @@ namespace _Assets.Scripts.Drops
 
         private IEnumerator DropSequence(List<Item> items, Vector3 origin, float perDropDelaySeconds)
         {
-            bool useUnscaled = _useUnscaledTimeForDelay;
             YieldInstruction wait = new WaitForSeconds(perDropDelaySeconds);
 
             for (int i = 0; i < items.Count; i++)
@@ -178,23 +178,31 @@ namespace _Assets.Scripts.Drops
 
         public GameObject SpawnLootObject(Item loot, Vector3 origin)
         {
-            var offset = (Vector3)(Random.insideUnitCircle * _spawnSpreadRadius);
+            var offset = (Vector3)(Random.insideUnitCircle*_spawnSpreadRadius);
             Vector3 spawnPos = origin + offset;
 
             GameObject goInstance = null;
 
             if (_defaultPickupPrefab)
             {
-                goInstance = Instantiate(_defaultPickupPrefab, spawnPos, Quaternion.identity);
+                goInstance = ObjectPoolManager.SpawnGameObject(_defaultPickupPrefab, spawnPos, Quaternion.identity);
+
                 var di = goInstance.GetComponent<DroppedItem>();
-                if (!di) di = goInstance.AddComponent<DroppedItem>();
+
+                if (!di)
+                    di = goInstance.AddComponent<DroppedItem>();
+
                 di.SetDefaultsIfNeeded(_defaultLifetimeSeconds);
                 di.Initialize(loot);
+
                 Register(di);
                 di.TryToss();
 
                 var pickup = goInstance.GetComponent<InteractablePickup>();
-                if (!pickup) pickup = goInstance.AddComponent<InteractablePickup>();
+                if (!pickup)
+                    goInstance.AddComponent<InteractablePickup>();
+
+                pickup.Reset();
             }
             else
             {

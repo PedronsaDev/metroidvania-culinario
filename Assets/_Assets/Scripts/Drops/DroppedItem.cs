@@ -49,7 +49,7 @@ namespace _Assets.Scripts.Drops
 
         private void OnDisable()
         {
-            if (DropManager.Instance != null)
+            if (DropManager.Instance)
                 DropManager.Instance.Unregister(this);
 
             if (_squashRoutine != null)
@@ -62,8 +62,11 @@ namespace _Assets.Scripts.Drops
 
         public void Initialize(Item payload)
         {
+            Reset();
+
             Payload = payload;
-            if (_renderer) _renderer.sprite = payload.Icon;
+            if (_renderer)
+                _renderer.sprite = payload.Icon;
         }
 
         public void SetDefaultsIfNeeded(float defaultLifetime)
@@ -77,7 +80,7 @@ namespace _Assets.Scripts.Drops
             _timeAlive += Time.deltaTime;
 
             if (_timeAlive >= _lifetimeSeconds)
-                Destroy(gameObject);
+                ObjectPoolManager.ReturnObjectToPool(this.gameObject);
 
             if (_timeAlive >= 3f)
             {
@@ -177,6 +180,17 @@ namespace _Assets.Scripts.Drops
 
             transform.localScale = _baseScale;
             _squashRoutine = null;
+        }
+
+        public void Reset()
+        {
+            _timeAlive = 0f;
+            _tossed = false;
+            _bounces = 0;
+            _landed = false;
+            transform.localScale = _baseScale;
+
+            OnCanBePickedUp = null;
         }
 
         [ContextMenu("Despawn Now")]
