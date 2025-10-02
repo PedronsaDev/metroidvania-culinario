@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class RecipeSelectionUI : BaseUIWindow
 {
@@ -52,6 +53,8 @@ public class RecipeSelectionUI : BaseUIWindow
             var entry = Instantiate(_entryPrefab, _listContainer);
             entry.Bind(recipe, _currentInventory, OnRecipeClicked);
         }
+
+        EventSystem.current.SetSelectedGameObject(recipes.Any() ? _listContainer.GetChild(0).gameObject : null);
     }
 
     private void Clear()

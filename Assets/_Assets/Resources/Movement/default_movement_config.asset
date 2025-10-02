@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa5ea8c3ef340e9b7dc1fa5375584f8, type: 3}
+  m_Name: default_movement_config
+  m_EditorClassIdentifier: Assembly-CSharp::MovementConfig
+  WalkSpeed: 8
+  RunSpeed: 12
+  GroundAcceleration: 120
+  GroundDeceleration: 80
+  AirAcceleration: 60
+  AirDeceleration: 55
+  ApexHorizontalAssist: 0.65
+  JumpHeight: 4.2
+  TimeToApex: 0.34
+  GravityReleaseMultiplier: 1.5
+  MaxAirJumps: 0
+  MinReleaseUpVelocity: 4
+  MaxFallSpeed: 20
+  FastFallSpeed: 24
+  LedgeWalkInitialGravityMultiplier: 0.025
+  LedgeWalkGravityRampTime: 0.4
+  TurnDecelMultiplier: 2
+  CoyoteTime: 0.1
+  JumpBufferTime: 0.12
+  ApexEaseTime: 0.08
+  GroundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  GroundProbeDistance: 0.06
+  CeilingProbeDistance: 0.06
+  GroundProbeWidthMultiplier: 0.9
+  DebugProbes: 1
+  Gravity: -72.66435
+  JumpVelocity: 24.70588

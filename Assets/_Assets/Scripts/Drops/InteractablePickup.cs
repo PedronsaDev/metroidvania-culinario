@@ -43,8 +43,10 @@ public class InteractablePickup : InteractableBase
     {
         if (!_autoPickupOnEnter || _collected || !_dropped)
             return;
+
         if (!_dropped.IsPickable)
             return;
+
         Collider2D hit = Physics2D.OverlapCircle(transform.position, _pickupRadius, _collectorMask);
 
         if (!hit)
@@ -57,7 +59,6 @@ public class InteractablePickup : InteractableBase
 
         var ctx = new InteractionContext(hit.gameObject, (Vector2)transform.position, Time.time);
         Interact(in ctx);
-
     }
 
     public override bool CanInteract(in InteractionContext context)

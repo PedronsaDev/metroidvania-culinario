@@ -99,10 +99,10 @@ namespace _Assets.Scripts.Drops
                 _rb2d.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
                 float angle = Random.Range(-_maxTossAngle, _maxTossAngle);
-                Vector2 dir2d = Quaternion.Euler(0, 0, angle) * Vector2.up;
+                Vector2 dir2d = Quaternion.Euler(0, 0, angle)*Vector2.up;
 
                 float magnitude = Random.Range(_tossForceRange.x, _tossForceRange.y);
-                _rb2d.AddForce(dir2d * magnitude, ForceMode2D.Impulse);
+                _rb2d.AddForce(dir2d*magnitude, ForceMode2D.Impulse);
 
                 float spin = Random.Range(_spinImpulseRange.x, _spinImpulseRange.y);
                 _rb2d.AddTorque(spin, ForceMode2D.Impulse);
@@ -124,7 +124,7 @@ namespace _Assets.Scripts.Drops
             if (_rb2d)
             {
                 Vector2 v = _rb2d.linearVelocity;
-                v.y = -v.y * _bounceDamping;
+                v.y = -v.y*_bounceDamping;
                 v.x *= Mathf.Lerp(1f, _bounceDamping, 0.35f);
                 _rb2d.linearVelocity = v;
             }
@@ -136,7 +136,6 @@ namespace _Assets.Scripts.Drops
             {
                 _tossed = false;
                 _landed = true;
-
                 OnCanBePickedUp?.Invoke();
             }
         }
@@ -153,8 +152,8 @@ namespace _Assets.Scripts.Drops
         {
             float half = Mathf.Max(0.01f, _squashDuration);
             Vector3 squashed = new Vector3(
-                _baseScale.x * (1f + _squashAmount),
-                _baseScale.y * (1f - _squashAmount),
+                _baseScale.x*(1f + _squashAmount),
+                _baseScale.y*(1f - _squashAmount),
                 _baseScale.z
             );
 
@@ -163,7 +162,7 @@ namespace _Assets.Scripts.Drops
             while (t < half)
             {
                 t += Time.deltaTime;
-                float k = Mathf.Clamp01(t / half);
+                float k = Mathf.Clamp01(t/half);
                 transform.localScale = Vector3.Lerp(start, squashed, k);
                 yield return null;
             }
@@ -173,7 +172,7 @@ namespace _Assets.Scripts.Drops
             while (t < half)
             {
                 t += Time.deltaTime;
-                float k = Mathf.Clamp01(t / half);
+                float k = Mathf.Clamp01(t/half);
                 transform.localScale = Vector3.Lerp(start, _baseScale, k);
                 yield return null;
             }
@@ -189,8 +188,6 @@ namespace _Assets.Scripts.Drops
             _bounces = 0;
             _landed = false;
             transform.localScale = _baseScale;
-
-            OnCanBePickedUp = null;
         }
 
         [ContextMenu("Despawn Now")]

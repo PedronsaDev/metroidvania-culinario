@@ -35,7 +35,8 @@ public class GlobalUIInput : MonoBehaviour
         }
         else if (_defaultWindow)
         {
-            _defaultWindow.Show();
+            if (ctx.control.device is Keyboard)
+                _defaultWindow.Show();
         }
     }
 }
