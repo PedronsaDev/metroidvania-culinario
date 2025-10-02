@@ -27,7 +27,6 @@ public class MovementConfig : ScriptableObject
     [Range(0f,0.6f)] public float LedgeWalkGravityRampTime = 0.25f;
 
     [Header("Advanced Horizontal Tweaks")]
-    [Tooltip("Extra deceleration applied when instantly reversing horizontal input (helps remove tiny boost from spam switching). 1 = none.")]
     [Range(1f,4f)] public float TurnDecelMultiplier = 2f;
 
     [Header("Timing Windows")]

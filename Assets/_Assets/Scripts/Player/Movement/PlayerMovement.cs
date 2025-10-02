@@ -37,7 +37,9 @@ public class PlayerMovement : MonoBehaviour
     private bool _ledgeFallActive;
     private float _ledgeFallTimer;
 
-    private bool _inputsSuspended; // true while UI manager blocks gameplay
+    private bool _inputsSuspended;
+
+    private float _recoilTimer;
 
     public event Action Jumped;
     public event Action Landed;
@@ -164,6 +166,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void HorizontalMove()
     {
+        if (_recoilTimer > 0f)
+        {
+            _recoilTimer -= Time.fixedDeltaTime;
+            return;
+        }
+
         Vector2 input = _moveAction?.ReadValue<Vector2>() ?? Vector2.zero;
         float baseSpeed = (_runAction != null && _runAction.IsPressed()) ? _config.RunSpeed : _config.WalkSpeed;
         float targetSpeed = input.x * baseSpeed;
@@ -361,23 +369,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleGameplayBlock()
     {
-        bool blocked = UIManager.Instance != null && UIManager.Instance.IsGameplayBlocked;
+        bool blocked = UIManager.Instance && UIManager.Instance.IsGameplayBlocked;
         if (blocked == _inputsSuspended)
-            return; // no change
+            return;
 
         _inputsSuspended = blocked;
         if (blocked)
         {
-            // Disable actions so player cannot provide movement/jump input while keeping physics and state updates running.
             Enable(_moveAction, false);
             Enable(_jumpAction, false);
             Enable(_runAction, false);
             _jumpHeld = false;
-            _jumpBufferTimer = 0f; // clear any buffered jump during UI block
+            _jumpBufferTimer = 0f;
         }
         else
         {
-            // Re-enable actions when gameplay resumes.
             Enable(_moveAction, true);
             Enable(_jumpAction, true);
             Enable(_runAction, true);
@@ -388,5 +394,21 @@ public class PlayerMovement : MonoBehaviour
     {
         _ledgeFallActive = true;
         _ledgeFallTimer = 0f;
+    }
+
+    public void ApplyRecoil(Vector2 recoilVelocity, float duration, bool overrideX = true, bool overrideY = false)
+    {
+        if (overrideX)
+            _rb.linearVelocity = new Vector2(recoilVelocity.x, _rb.linearVelocity.y);
+        if (overrideY)
+        {
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, recoilVelocity.y);
+            if (recoilVelocity.y > 0f)
+            {
+                _grounded = false;
+                _vState = VerticalState.Rising;
+            }
+        }
+        _recoilTimer = Mathf.Max(_recoilTimer, duration);
     }
 }

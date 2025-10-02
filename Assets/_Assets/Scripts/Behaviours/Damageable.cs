@@ -1,13 +1,15 @@
-
-using System;
 using UnityEngine;
 
 [RequireComponent(typeof(DamageFlash))]
 public class Damageable : MonoBehaviour, IHittable
 {
-    public bool GiveUpwardForce { get; set; }
+    [Header("Pogo Settings")]
+    [SerializeField] private bool _giveUpwardForce;
+    [SerializeField] private float _upwardForce = 22f;
+
+    public bool GiveUpwardForce { get => _giveUpwardForce; set => _giveUpwardForce = value; }
     public bool WasHit { get; set; }
-    public float UpwardForce { get; set; }
+    public float UpwardForce { get => _upwardForce; set => _upwardForce = value; }
 
     [SerializeField] protected int _currentHealth;
     [SerializeField] protected int _maxHealth = 3;
@@ -16,7 +18,7 @@ public class Damageable : MonoBehaviour, IHittable
     private DamageFlash _damageFlash;
 
 
-    private void Awake()
+    protected virtual void Awake()
     {
         _damageFlash = GetComponent<DamageFlash>();
     }
@@ -59,5 +61,6 @@ public class Damageable : MonoBehaviour, IHittable
         WasHit = true;
         _currentHealth = 0;
         this.enabled = false;
+        this.gameObject.SetActive(false);
     }
 }

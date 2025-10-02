@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -10,7 +8,7 @@ public class DamageFlash : MonoBehaviour
 
     [SerializeField] private Color _flashColor = Color.white;
     [SerializeField] private float _flashTime = 0.25f;
-    [SerializeField] private Ease _flashSpeedCurve;
+    [SerializeField] private Ease _flashSpeedCurve = Ease.Linear;
 
     private SpriteRenderer[] _spriteRenderers;
     private Material[] _materials;
