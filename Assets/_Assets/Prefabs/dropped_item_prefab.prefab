@@ -154,7 +154,7 @@ MonoBehaviour:
   _autoPickupOnEnter: 1
   _collectorMask:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 2048
   _onlyPickupIfInventoryAccepts: 1
   _pickupRadius: 0.75
 --- !u!50 &-1858763821213217727

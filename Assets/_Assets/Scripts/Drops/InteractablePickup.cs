@@ -52,12 +52,14 @@ public class InteractablePickup : InteractableBase
         if (!hit)
             return;
 
-        hit.TryGetComponent<IItemCollector>(out var collector);
+        //hit.TryGetComponent<IItemCollector>(out var collector);
+
+        var collector = hit.transform.parent.gameObject.GetComponent<IItemCollector>();
 
         if (_onlyPickupIfInventoryAccepts && (collector == null || !collector.CanAccept(_dropped.Payload, _quantity)))
             return;
 
-        var ctx = new InteractionContext(hit.gameObject, (Vector2)transform.position, Time.time);
+        var ctx = new InteractionContext(hit.transform.parent.gameObject, (Vector2)transform.position, Time.time);
         Interact(in ctx);
     }
 
@@ -116,12 +118,14 @@ public class InteractablePickup : InteractableBase
         if (((1 << other.gameObject.layer) & _collectorMask) == 0)
             return;
 
-        var collector = other.GetComponent<IItemCollector>();
+        //var collector = other.GetComponent<IItemCollector>();
+
+        var collector = other.transform.parent.gameObject.GetComponent<IItemCollector>();
 
         if (_onlyPickupIfInventoryAccepts && (collector == null || !collector.CanAccept(_dropped.Payload, _quantity)))
             return;
 
-        var ctx = new InteractionContext(other.gameObject, (Vector2)transform.position, Time.time);
+        var ctx = new InteractionContext(other.transform.parent.gameObject, (Vector2)transform.position, Time.time);
         Interact(in ctx);
     }
 
