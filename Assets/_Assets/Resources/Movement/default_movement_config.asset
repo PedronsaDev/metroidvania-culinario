@@ -28,6 +28,7 @@ MonoBehaviour:
   FastFallSpeed: 24
   LedgeWalkInitialGravityMultiplier: 0.025
   LedgeWalkGravityRampTime: 0.4
+  FallingSpeedDampingChangeThreshold: -10
   TurnDecelMultiplier: 2
   CoyoteTime: 0.1
   JumpBufferTime: 0.12

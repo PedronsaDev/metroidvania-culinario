@@ -44,6 +44,8 @@ public class PlayerMovement : MonoBehaviour
     public event Action Jumped;
     public event Action Landed;
 
+    public event Action Flipped;
+
     public bool Grounded => _grounded;
     public float HorizontalSpeed => _rb != null ? _rb.linearVelocity.x : 0f;
     public float VerticalSpeed => _rb != null ? _rb.linearVelocity.y : 0f;
@@ -220,9 +222,11 @@ public class PlayerMovement : MonoBehaviour
             return;
 
         _facingRight = right;
+        Flipped?.Invoke();
+
         var s = transform.localScale;
-        s.x *= -1f;
-        transform.localScale = s;
+        //s.x *= -1f;
+        //transform.localScale = s;
     }
 
     private void TryConsumeBufferedJump()
@@ -281,6 +285,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         _vState = _rb.linearVelocity.y > 0.01f ? VerticalState.Rising : VerticalState.Falling;
+
+
         if (_vState == VerticalState.Rising && _ledgeFallActive)
         {
             _ledgeFallActive = false;

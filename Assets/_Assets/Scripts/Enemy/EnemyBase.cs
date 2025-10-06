@@ -15,6 +15,7 @@ public class EnemyBase : Damageable
     protected override void Die()
     {
         _dropper.DropNow();
+        CameraManager.Instance.ShakeCamera(1f);
         base.Die();
     }
 }

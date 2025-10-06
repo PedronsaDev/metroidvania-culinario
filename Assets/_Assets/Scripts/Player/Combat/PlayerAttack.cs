@@ -33,7 +33,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private float _pogoUpVelocity = 22f;
     [SerializeField] private float _pogoRecoilDuration = 0.04f;
     [SerializeField] private bool _respectTargetUpwardForceFlag = true;
-    [SerializeField, Range(0f,1f)] private float _horizontalRecoilVsVerticalRatio = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float _horizontalRecoilVsVerticalRatio = 0.5f;
 
     [Header("Debug")]
     [SerializeField] private bool _debugGizmos;
@@ -50,7 +50,6 @@ public class PlayerAttack : MonoBehaviour
     [Header("Runtime Debug State (Read Only)")]
     [SerializeField, ReadOnly] private int _lastAcceptedCount;
     [SerializeField, ReadOnly] private int _lastRejectedCount;
-    [SerializeField, ReadOnly] private bool _lastWasTruncated;
     [SerializeField, ReadOnly] private int _lastEffectiveCount;
     [SerializeField, ReadOnly] private int _lastInvulnerableCount;
 
@@ -70,7 +69,7 @@ public class PlayerAttack : MonoBehaviour
 
     public event Action AttackStarted;
     public event Action<bool> AttackHit;
-    public event Action<bool,int> AttackResolved;
+    public event Action<bool, int> AttackResolved;
 
     private enum AttackDir { Left, Right, Down, Up }
 
@@ -84,8 +83,13 @@ public class PlayerAttack : MonoBehaviour
     {
         if (!_movement)
             _movement = GetComponent<PlayerMovement>();
-        if (_attackRef) _attackAction = _attackRef.action;
-        if (_moveRef) _moveAction = _moveRef.action;
+
+        if (_attackRef)
+            _attackAction = _attackRef.action;
+
+        if (_moveRef)
+            _moveAction = _moveRef.action;
+
         AllocateBuffer();
     }
 
@@ -118,7 +122,8 @@ public class PlayerAttack : MonoBehaviour
         if (_attackVisualTimer > 0f)
         {
             _attackVisualTimer -= Time.deltaTime;
-            if (_attackVisualTimer <= 0f) _lastAttackValid = false;
+            if (_attackVisualTimer <= 0f)
+                _lastAttackValid = false;
         }
     }
 
@@ -202,50 +207,85 @@ public class PlayerAttack : MonoBehaviour
 
     private void DoHorizontalAttack(bool right)
     {
-        if (_hitBuffer == null || _hitBuffer.Length == 0) AllocateBuffer();
+        if (_hitBuffer == null || _hitBuffer.Length == 0)
+            AllocateBuffer();
+
         Vector2 origin = transform.position;
         Vector2 center = origin + new Vector2((right ? 1f : -1f)*_horizontalForwardOffset, 0f);
         _lastAttackCenter = center;
         _lastAttackSize = _horizontalSize;
         _lastAttackValid = true;
+
         if (_debugGizmos)
         {
             _debugAccepted.Clear();
             _debugRejected.Clear();
             _debugTruncated = false;
         }
+
         int count = OverlapBox(center, _horizontalSize);
         bool truncated = count >= _hitBuffer.Length;
         bool anyHit = false;
         HashSet<IHittable> processed = new();
-        _lastAcceptedCount = 0; _lastRejectedCount = 0; _lastWasTruncated = false; _lastEffectiveCount = 0; _lastInvulnerableCount = 0; _debugInvulnerable.Clear();
+        _lastAcceptedCount = 0;
+        _lastRejectedCount = 0;
+        _lastEffectiveCount = 0;
+        _lastInvulnerableCount = 0;
+        _debugInvulnerable.Clear();
         for (int i = 0; i < count; i++)
         {
             var col = _hitBuffer[i];
-            if (!col) continue;
+            if (!col)
+                continue;
+
             if (col.attachedRigidbody && col.attachedRigidbody.gameObject == gameObject)
-            { if (_debugGizmos) _debugRejected.Add(col); _lastRejectedCount++; continue; }
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                _lastRejectedCount++;
+                continue;
+            }
             IHittable hittable = col.GetComponentInParent<IHittable>();
-            if (hittable == null) { if (_debugGizmos) _debugRejected.Add(col); _lastRejectedCount++; continue; }
-            if (!processed.Add(hittable)) { if (_debugGizmos) _debugRejected.Add(col); continue; }
+            if (hittable == null)
+            {
+                if (_debugGizmos)
+                    _debugRejected.Add(col);
+
+                _lastRejectedCount++;
+                continue;
+            }
+            if (!processed.Add(hittable))
+            {
+                if (_debugGizmos)
+                    _debugRejected.Add(col);
+                continue;
+            }
             Vector3 hitPoint = col.bounds.ClosestPoint(origin);
             Vector3 dir = (col.bounds.center - (Vector3)origin).normalized;
             bool preWasHit = hittable.WasHit;
             hittable.Hit(hitPoint, dir, _damage);
             bool effective = !preWasHit && hittable.WasHit;
-            if (!effective && preWasHit && _debugGizmos) _debugInvulnerable.Add(col);
-            if (effective) _lastEffectiveCount++; else if (preWasHit) _lastInvulnerableCount++;
+            if (!effective && preWasHit && _debugGizmos)
+                _debugInvulnerable.Add(col);
+
+            if (effective)
+                _lastEffectiveCount++;
+            else if (preWasHit)
+                _lastInvulnerableCount++;
             anyHit = true;
-            if (_debugGizmos) _debugAccepted.Add(col);
+            if (_debugGizmos)
+                _debugAccepted.Add(col);
+
             _lastAcceptedCount++;
         }
-        if (_debugGizmos && truncated) { _debugTruncated = true; _lastWasTruncated = true; }
+        if (_debugGizmos && truncated) { _debugTruncated = true; }
         if (anyHit)
         {
             float recoilSign = right ? -1f : 1f;
             float cappedHorizontalSpeed = _horizontalRecoilSpeed;
-            float maxAllowed = _pogoUpVelocity * _horizontalRecoilVsVerticalRatio;
-            if (cappedHorizontalSpeed > maxAllowed) cappedHorizontalSpeed = maxAllowed;
+            float maxAllowed = _pogoUpVelocity*_horizontalRecoilVsVerticalRatio;
+            if (cappedHorizontalSpeed > maxAllowed)
+                cappedHorizontalSpeed = maxAllowed;
+
             _movement.ApplyRecoil(new Vector2(recoilSign*cappedHorizontalSpeed, _movement.VerticalSpeed), _horizontalRecoilDuration, overrideX: true, overrideY: false);
             AttackHit?.Invoke(false);
             AttackResolved?.Invoke(true, _lastAcceptedCount);
@@ -263,7 +303,9 @@ public class PlayerAttack : MonoBehaviour
 
     private void DoDownAttack()
     {
-        if (_hitBuffer == null || _hitBuffer.Length == 0) AllocateBuffer();
+        if (_hitBuffer == null || _hitBuffer.Length == 0)
+            AllocateBuffer();
+
         Vector2 origin = transform.position;
         Vector2 center = origin + Vector2.down*_downOffset;
         _lastAttackCenter = center;
@@ -275,17 +317,27 @@ public class PlayerAttack : MonoBehaviour
             _debugRejected.Clear();
             _debugTruncated = false;
         }
+
         int count = OverlapBox(center, _downSize);
         bool truncated = count >= _hitBuffer.Length;
         bool pogo = false;
         HashSet<IHittable> processed = new();
-        _lastAcceptedCount = 0; _lastRejectedCount = 0; _lastWasTruncated = false; _lastEffectiveCount = 0; _lastInvulnerableCount = 0; _debugInvulnerable.Clear();
+        _lastAcceptedCount = 0;
+        _lastRejectedCount = 0;
+        _lastEffectiveCount = 0;
+        _lastInvulnerableCount = 0;
+        _debugInvulnerable.Clear();
         float threshY = origin.y - _verticalFilterTolerance;
         for (int i = 0; i < count; i++)
         {
             var col = _hitBuffer[i];
             if (col == null) continue;
-            if (col.attachedRigidbody && col.attachedRigidbody.gameObject == gameObject) { if (_debugGizmos) _debugRejected.Add(col); _lastRejectedCount++; continue; }
+            if (col.attachedRigidbody && col.attachedRigidbody.gameObject == gameObject)
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                _lastRejectedCount++;
+                continue;
+            }
             bool below;
             if (_skipVerticalFilter)
                 below = true;
@@ -293,21 +345,42 @@ public class PlayerAttack : MonoBehaviour
                 below = col.bounds.center.y <= threshY;
             else
                 below = col.bounds.max.y <= threshY;
-            if (!below) { if (_debugGizmos) _debugRejected.Add(col); _lastRejectedCount++; continue; }
+            if (!below)
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                _lastRejectedCount++;
+                continue;
+            }
             IHittable hittable = col.GetComponentInParent<IHittable>();
-            if (hittable == null) { if (_debugGizmos) _debugRejected.Add(col); continue; }
-            if (!processed.Add(hittable)) { if (_debugGizmos) _debugRejected.Add(col); continue; }
+            if (hittable == null)
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                continue;
+            }
+            if (!processed.Add(hittable))
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                continue;
+            }
             Vector3 hitPoint = col.bounds.ClosestPoint(origin);
             bool preWasHit = hittable.WasHit;
             hittable.Hit(hitPoint, Vector3.down, _damage);
             bool effective = !preWasHit && hittable.WasHit;
-            if (!effective && preWasHit && _debugGizmos) _debugInvulnerable.Add(col);
-            if (effective) _lastEffectiveCount++; else if (preWasHit) _lastInvulnerableCount++;
+            if (!effective && preWasHit && _debugGizmos)
+                _debugInvulnerable.Add(col);
+            if (effective)
+                _lastEffectiveCount++;
+            else if (preWasHit)
+                _lastInvulnerableCount++;
+
             pogo = true;
-            if (_debugGizmos) _debugAccepted.Add(col);
+            if (_debugGizmos)
+                _debugAccepted.Add(col);
+
             _lastAcceptedCount++;
         }
-        if (_debugGizmos && truncated) { _debugTruncated = true; _lastWasTruncated = true; }
+        if (_debugGizmos && truncated)
+            _debugTruncated = true;
         if (pogo)
         {
             float upVel = _pogoUpVelocity;
@@ -336,7 +409,7 @@ public class PlayerAttack : MonoBehaviour
     {
         if (_hitBuffer == null || _hitBuffer.Length == 0) AllocateBuffer();
         Vector2 origin = transform.position;
-        Vector2 center = origin + Vector2.up * _upOffset;
+        Vector2 center = origin + Vector2.up*_upOffset;
         _lastAttackCenter = center;
         _lastAttackSize = _upSize;
         _lastAttackValid = true;
@@ -350,35 +423,68 @@ public class PlayerAttack : MonoBehaviour
         bool truncated = count >= _hitBuffer.Length;
         bool anyHit = false;
         HashSet<IHittable> processed = new();
-        _lastAcceptedCount = 0; _lastRejectedCount = 0; _lastWasTruncated = false; _lastEffectiveCount = 0; _lastInvulnerableCount = 0; _debugInvulnerable.Clear();
+        _lastAcceptedCount = 0;
+        _lastRejectedCount = 0;
+        _lastEffectiveCount = 0;
+        _lastInvulnerableCount = 0;
+        _debugInvulnerable.Clear();
         float threshY = origin.y + _verticalFilterTolerance;
         for (int i = 0; i < count; i++)
         {
             var col = _hitBuffer[i];
-            if (col == null) continue;
-            if (col.attachedRigidbody && col.attachedRigidbody.gameObject == gameObject) { if (_debugGizmos) _debugRejected.Add(col); _lastRejectedCount++; continue; }
+            if (!col)
+                continue;
+            if (col.attachedRigidbody && col.attachedRigidbody.gameObject == gameObject)
+            {
+                if (_debugGizmos)
+                    _debugRejected.Add(col);
+                _lastRejectedCount++;
+                continue;
+            }
             bool above;
+
             if (_skipVerticalFilter)
                 above = true;
             else if (_useCenterForVerticalFilter)
                 above = col.bounds.center.y >= threshY;
             else
                 above = col.bounds.min.y >= threshY;
-            if (!above) { if (_debugGizmos) _debugRejected.Add(col); _lastRejectedCount++; continue; }
+
+            if (!above)
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                _lastRejectedCount++;
+                continue;
+            }
             IHittable hittable = col.GetComponentInParent<IHittable>();
-            if (hittable == null) { if (_debugGizmos) _debugRejected.Add(col); continue; }
-            if (!processed.Add(hittable)) { if (_debugGizmos) _debugRejected.Add(col); continue; }
+            if (hittable == null)
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                continue;
+            }
+            if (!processed.Add(hittable))
+            {
+                if (_debugGizmos) _debugRejected.Add(col);
+                continue;
+            }
             Vector3 hitPoint = col.bounds.ClosestPoint(origin);
             bool preWasHit = hittable.WasHit;
             hittable.Hit(hitPoint, Vector3.up, _damage);
             bool effective = !preWasHit && hittable.WasHit;
-            if (!effective && preWasHit && _debugGizmos) _debugInvulnerable.Add(col);
-            if (effective) _lastEffectiveCount++; else if (preWasHit) _lastInvulnerableCount++;
+            if (!effective && preWasHit && _debugGizmos)
+                _debugInvulnerable.Add(col);
+            if (effective)
+                _lastEffectiveCount++;
+            else if (preWasHit)
+                _lastInvulnerableCount++;
+
             anyHit = true;
-            if (_debugGizmos) _debugAccepted.Add(col);
+            if (_debugGizmos)
+                _debugAccepted.Add(col);
+
             _lastAcceptedCount++;
         }
-        if (_debugGizmos && truncated) { _debugTruncated = true; _lastWasTruncated = true; }
+        if (_debugGizmos && truncated) { _debugTruncated = true; }
         AttackResolved?.Invoke(anyHit, _lastAcceptedCount);
 #if UNITY_EDITOR
         if (_debugGizmos && truncated)
@@ -402,7 +508,7 @@ public class PlayerAttack : MonoBehaviour
         if (Application.isPlaying && _lastAttackValid && _attackVisualTimer > 0f)
         {
             Color prev = Gizmos.color;
-            Gizmos.color = new Color(1f,0f,0f,0.35f);
+            Gizmos.color = new Color(1f, 0f, 0f, 0.35f);
             Gizmos.DrawCube(_lastAttackCenter, _lastAttackSize);
             Gizmos.color = Color.red;
             Gizmos.DrawWireCube(_lastAttackCenter, _lastAttackSize);

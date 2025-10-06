@@ -4,22 +4,18 @@
 public class PlayerAnimationController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private PlayerMovement movement;
-    [SerializeField] private Animator animator;
-    [Tooltip("Automatically flip SpriteRenderer by scale instead of using animator mirror.")]
-    [SerializeField] private bool flipByScale = true;
-    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private PlayerMovement _movement;
+    [SerializeField] private Animator _animator;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
 
     [Header("Thresholds")]
-    [Tooltip("Horizontal speed magnitude above which 'Moving' becomes true.")]
-    [SerializeField] private float movingSpeedThreshold = 0.1f;
+    [SerializeField] private float _movingSpeedThreshold = 0.1f;
 
-    [Tooltip("Filter factor (0 = instant) for horizontal speed smoothing for animation.")]
     [Range(0f, 1f)]
-    [SerializeField] private float horizontalSmoothing = 0.15f;
+    [SerializeField] private float _horizontalSmoothing = 0.15f;
 
     [Header("Debug")]
-    [SerializeField] private bool debugLogEvents;
+    [SerializeField] private bool _debugLogEvents;
 
     private int _pSpeedXAbs;
     private int _pSpeedY;
@@ -35,34 +31,34 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void Reset()
     {
-        if (!movement) movement = GetComponent<PlayerMovement>();
-        if (!animator) animator = GetComponentInChildren<Animator>();
-        if (!spriteRenderer) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (!_movement) _movement = GetComponent<PlayerMovement>();
+        if (!_animator) _animator = GetComponentInChildren<Animator>();
+        if (!_spriteRenderer) _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void Awake()
     {
-        if (!movement) movement = GetComponent<PlayerMovement>();
-        if (!animator) animator = GetComponentInChildren<Animator>();
-        if (!spriteRenderer) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (!_movement) _movement = GetComponent<PlayerMovement>();
+        if (!_animator) _animator = GetComponentInChildren<Animator>();
+        if (!_spriteRenderer) _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         CacheHashes();
     }
 
     private void OnEnable()
     {
-        if (movement)
+        if (_movement)
         {
-            movement.Jumped += OnJumped;
-            movement.Landed += OnLanded;
+            _movement.Jumped += OnJumped;
+            _movement.Landed += OnLanded;
         }
     }
 
     private void OnDisable()
     {
-        if (movement)
+        if (_movement)
         {
-            movement.Jumped -= OnJumped;
-            movement.Landed -= OnLanded;
+            _movement.Jumped -= OnJumped;
+            _movement.Landed -= OnLanded;
         }
     }
 
@@ -81,47 +77,56 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void Update()
     {
-        if (!movement || !animator) return;
+        if (!_movement || !_animator) return;
 
-        float targetAbsX = Mathf.Abs(movement.HorizontalSpeed);
-        _smoothedAbsX = Mathf.Lerp(_smoothedAbsX, targetAbsX, 1f - Mathf.Pow(1f - Mathf.Clamp01(1f - horizontalSmoothing), Time.deltaTime*60f));
+        float targetAbsX = Mathf.Abs(_movement.HorizontalSpeed);
+        _smoothedAbsX = Mathf.Lerp(_smoothedAbsX, targetAbsX, 1f - Mathf.Pow(1f - Mathf.Clamp01(1f - _horizontalSmoothing), Time.deltaTime*60f));
 
-        animator.SetFloat(_pSpeedXAbs, _smoothedAbsX);
-        animator.SetFloat(_pSpeedY, movement.VerticalSpeed);
-        animator.SetBool(_pGrounded, movement.Grounded);
-        animator.SetInteger(_pVerticalState, movement.VerticalStateId);
-        animator.SetBool(_pLedgeEase, movement.LedgeFallEasing);
-        animator.SetBool(_pMoving, targetAbsX > movingSpeedThreshold && movement.Grounded);
-        animator.SetFloat(_pSpeedX01, movement.NormalizedHorizontalSpeed);
+        _animator.SetFloat(_pSpeedXAbs, _smoothedAbsX);
+        _animator.SetFloat(_pSpeedY, _movement.VerticalSpeed);
+        _animator.SetBool(_pGrounded, _movement.Grounded);
+        _animator.SetInteger(_pVerticalState, _movement.VerticalStateId);
+        _animator.SetBool(_pLedgeEase, _movement.LedgeFallEasing);
+        _animator.SetBool(_pMoving, targetAbsX > _movingSpeedThreshold && _movement.Grounded);
+        _animator.SetFloat(_pSpeedX01, _movement.NormalizedHorizontalSpeed);
 
-        if (flipByScale)
-        {
-            var tr = transform;
-            Vector3 scale = tr.localScale;
-            float sign = movement.FacingRight ? 1f : -1f;
-            if (scale.x*sign < 0f) scale.x = -scale.x;
+        FlipByRotation();
+    }
 
-            tr.localScale = scale;
-        }
-        else if (spriteRenderer)
-        {
-            spriteRenderer.flipX = !movement.FacingRight;
-        }
+    private void FlipBySprite() => _spriteRenderer.flipX = !_movement.FacingRight;
+
+    private void FlipByScale()
+    {
+        var tr = transform;
+        Vector3 scale = tr.localScale;
+        float sign = _movement.FacingRight ? 1f : -1f;
+        if (scale.x*sign < 0f)
+            scale.x = -scale.x;
+
+        tr.localScale = scale;
+    }
+
+    private void FlipByRotation()
+    {
+        var tr = _spriteRenderer.transform;
+        Vector3 rot = tr.eulerAngles;
+        rot.y = _movement.FacingRight ? 0f : -180f;
+        tr.eulerAngles = rot;
     }
 
     private void OnJumped()
     {
-        if (!animator) return;
-        animator.ResetTrigger(_tLand);
-        animator.SetTrigger(_tJump);
-        if (debugLogEvents) Debug.Log("[Anim] Jump trigger");
+        if (!_animator) return;
+        _animator.ResetTrigger(_tLand);
+        _animator.SetTrigger(_tJump);
+        if (_debugLogEvents) Debug.Log("[Anim] Jump trigger");
     }
 
     private void OnLanded()
     {
-        if (!animator) return;
-        animator.ResetTrigger(_tJump);
-        animator.SetTrigger(_tLand);
-        if (debugLogEvents) Debug.Log("[Anim] Land trigger");
+        if (!_animator) return;
+        _animator.ResetTrigger(_tJump);
+        _animator.SetTrigger(_tLand);
+        if (_debugLogEvents) Debug.Log("[Anim] Land trigger");
     }
 }

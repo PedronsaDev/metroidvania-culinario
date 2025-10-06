@@ -5,7 +5,7 @@ public class Damageable : MonoBehaviour, IHittable
 {
     [Header("Pogo Settings")]
     [SerializeField] private bool _giveUpwardForce;
-    [SerializeField] private float _upwardForce = 22f;
+    [SerializeField] private float _upwardForce = 30f;
 
     public bool GiveUpwardForce { get => _giveUpwardForce; set => _giveUpwardForce = value; }
     public bool WasHit { get; set; }
@@ -23,7 +23,7 @@ public class Damageable : MonoBehaviour, IHittable
         _damageFlash = GetComponent<DamageFlash>();
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         _currentHealth = _maxHealth;
     }

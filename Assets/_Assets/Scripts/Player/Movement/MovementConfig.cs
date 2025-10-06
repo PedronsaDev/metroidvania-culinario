@@ -25,6 +25,7 @@ public class MovementConfig : ScriptableObject
     [Header("Ledge Fall Ease")]
     [Range(0f,1f)] public float LedgeWalkInitialGravityMultiplier = 0.2f;
     [Range(0f,0.6f)] public float LedgeWalkGravityRampTime = 0.25f;
+    [MaxValue(0f)]public float FallingSpeedDampingChangeThreshold = -10f;
 
     [Header("Advanced Horizontal Tweaks")]
     [Range(1f,4f)] public float TurnDecelMultiplier = 2f;

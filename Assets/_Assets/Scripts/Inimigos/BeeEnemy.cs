@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BeeEnemy : MonoBehaviour
+public class BeeEnemy : EnemyBase
 {
     [Header("Movimento")]
     public float speed = 2f;
@@ -19,10 +19,12 @@ public class BeeEnemy : MonoBehaviour
     private Transform player;
     private float lastAttackTime;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+
         startPos = transform.position;
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
         if (lancaHitbox != null)
