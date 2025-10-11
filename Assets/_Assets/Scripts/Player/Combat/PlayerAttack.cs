@@ -8,6 +8,7 @@ public class PlayerAttack : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerMovement _movement;
+    [SerializeField] private PlayerRecoil _recoil;
     [SerializeField] private InputActionReference _attackRef;
     [SerializeField] private InputActionReference _moveRef;
 
@@ -27,13 +28,8 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private Vector2 _upSize = new Vector2(1.0f, 1.0f);
     [SerializeField] private float _upOffset = 0.9f;
 
-    [Header("Recoil")]
-    [SerializeField] private float _horizontalRecoilSpeed = 12f;
-    [SerializeField] private float _horizontalRecoilDuration = 0.08f;
-    [SerializeField] private float _pogoUpVelocity = 22f;
-    [SerializeField] private float _pogoRecoilDuration = 0.04f;
+    [Header("Attack Recoil Settings")]
     [SerializeField] private bool _respectTargetUpwardForceFlag = true;
-    [SerializeField, Range(0f, 1f)] private float _horizontalRecoilVsVerticalRatio = 0.5f;
 
     [Header("Debug")]
     [SerializeField] private bool _debugGizmos;
@@ -83,6 +79,8 @@ public class PlayerAttack : MonoBehaviour
     {
         if (!_movement)
             _movement = GetComponent<PlayerMovement>();
+        if (!_recoil)
+            _recoil = GetComponent<PlayerRecoil>();
 
         if (_attackRef)
             _attackAction = _attackRef.action;
@@ -136,10 +134,11 @@ public class PlayerAttack : MonoBehaviour
         if (!_movement) return;
 
         Vector2 moveInput = _moveAction?.ReadValue<Vector2>() ?? Vector2.zero;
-        bool tryDown = moveInput.y < -0.3f && !_movement.Grounded;
-        bool tryUp = moveInput.y > 0.3f;
+        bool tryDown = moveInput.y < -0.5f && !_movement.Grounded;
+        bool tryUp = moveInput.y > 0.4f;
 
         AttackDir dir;
+
         if (tryDown)
             dir = AttackDir.Down;
         else if (tryUp)
@@ -280,13 +279,8 @@ public class PlayerAttack : MonoBehaviour
         if (_debugGizmos && truncated) { _debugTruncated = true; }
         if (anyHit)
         {
-            float recoilSign = right ? -1f : 1f;
-            float cappedHorizontalSpeed = _horizontalRecoilSpeed;
-            float maxAllowed = _pogoUpVelocity*_horizontalRecoilVsVerticalRatio;
-            if (cappedHorizontalSpeed > maxAllowed)
-                cappedHorizontalSpeed = maxAllowed;
-
-            _movement.ApplyRecoil(new Vector2(recoilSign*cappedHorizontalSpeed, _movement.VerticalSpeed), _horizontalRecoilDuration, overrideX: true, overrideY: false);
+            if (_recoil)
+                _recoil.AttackHorizontalRecoil(right);
             AttackHit?.Invoke(false);
             AttackResolved?.Invoke(true, _lastAcceptedCount);
         }
@@ -297,7 +291,7 @@ public class PlayerAttack : MonoBehaviour
         }
 #if UNITY_EDITOR
         if (_debugGizmos && truncated)
-            Debug.LogWarning($"[PlayerAttack] Horizontal hit buffer truncated at capacity {_hitBuffer.Length}.");
+            Debug.LogWarning($"Horizontal hit buffer truncated at capacity {_hitBuffer.Length}.");
 #endif
     }
 
@@ -383,14 +377,15 @@ public class PlayerAttack : MonoBehaviour
             _debugTruncated = true;
         if (pogo)
         {
-            float upVel = _pogoUpVelocity;
+            float upVel = 0f;
             if (_respectTargetUpwardForceFlag)
             {
                 foreach (var h in processed)
                     if (h.GiveUpwardForce && h.UpwardForce > 0f)
                         upVel = Mathf.Max(upVel, h.UpwardForce);
             }
-            _movement.ApplyRecoil(new Vector2(_movement.HorizontalSpeed, upVel), _pogoRecoilDuration, overrideX: false, overrideY: true);
+            if (_recoil)
+                _recoil.PogoRecoil(upVel);
             AttackHit?.Invoke(true);
             AttackResolved?.Invoke(true, _lastAcceptedCount);
         }
@@ -401,7 +396,7 @@ public class PlayerAttack : MonoBehaviour
         }
 #if UNITY_EDITOR
         if (_debugGizmos && truncated)
-            Debug.LogWarning($"[PlayerAttack] Down attack hit buffer truncated at capacity {_hitBuffer.Length}.");
+            Debug.LogWarning($"Down attack hit buffer truncated at capacity {_hitBuffer.Length}.");
 #endif
     }
 
@@ -488,7 +483,7 @@ public class PlayerAttack : MonoBehaviour
         AttackResolved?.Invoke(anyHit, _lastAcceptedCount);
 #if UNITY_EDITOR
         if (_debugGizmos && truncated)
-            Debug.LogWarning($"[PlayerAttack] Up attack hit buffer truncated at capacity {_hitBuffer.Length}.");
+            Debug.LogWarning($"Up attack hit buffer truncated at capacity {_hitBuffer.Length}.");
 #endif
     }
 

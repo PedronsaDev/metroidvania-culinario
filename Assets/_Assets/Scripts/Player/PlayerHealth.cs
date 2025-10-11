@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using NaughtyAttributes;
 
-
 [RequireComponent(typeof(DamageFlash))]
 public class PlayerHealth : MonoBehaviour, IDamageable
 {
@@ -12,17 +11,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     [Header("I-Frames")]
     [SerializeField, Range(0.05f, 2f)] private float _postHitInvuln = 0.6f;
-    [SerializeField] private bool _flashDuringIFrames = true;
-
-    [Header("Recoil")]
-    [SerializeField] private float _horizontalHitRecoilSpeed = 14f;
-    [SerializeField] private float _horizontalHitVerticalBoost = 6f;
-    [SerializeField] private float _horizontalHitRecoilDuration = 0.12f;
-    [SerializeField] private float _verticalBounceVelocity = 23f;
-    [SerializeField] private float _verticalBounceHorizontalNudge = 6f;
-    [SerializeField] private float _verticalBounceRecoilDuration = 0.08f;
-    [SerializeField, Range(1f, 3f)] private float _minSeparationPushMultiplier = 1.6f;
-    [SerializeField, Range(0f, 1f)] private float _tinySeparationThreshold = 0.15f;
 
     [Header("(Read Only)")]
     [SerializeField, ReadOnly] private bool _invulnerable;
@@ -30,9 +18,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [SerializeField, ReadOnly] private float _invulnRemaining;
 
     private PlayerMovement _movement;
+    private PlayerRecoil _recoil;
     private float _invulnTimer;
     private SpriteRenderer[] _renderers;
-    private Color[] _originalColors;
+    private DamageFlash _damageFlash;
 
     public event Action Damaged;
     public event Action<int, int> HealthChanged;
@@ -47,21 +36,14 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private void Awake()
     {
         _movement = GetComponent<PlayerMovement>();
-        CacheRenderers();
+        _recoil = GetComponent<PlayerRecoil>();
+        _damageFlash = GetComponent<DamageFlash>();
         SetHealth(_maxHealth);
     }
 
     private void Update()
     {
         TickInvulnerability();
-    }
-
-    private void CacheRenderers()
-    {
-        _renderers = GetComponentsInChildren<SpriteRenderer>(true);
-        _originalColors = new Color[_renderers.Length];
-        for (int i = 0; i < _renderers.Length; i++)
-            _originalColors[i] = _renderers[i].color;
     }
 
     private void SetHealth(int health)
@@ -87,10 +69,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         CameraManager.Instance?.ShakeCamera(1f);
 
         StartInvulnerability();
+        _damageFlash.Flash();
         Damaged?.Invoke();
 
-        if (source && _movement)
-            ApplyHitRecoil(source.position);
+        if (source && _recoil)
+            _recoil.ApplyHitRecoilFromSource(source.position);
 
         CheckHealth();
     }
@@ -109,7 +92,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         _invulnerable = false;
         _invulnRemaining = 0f;
         IFramesEnded?.Invoke();
-        RestoreRendererColors();
     }
 
     private void TickInvulnerability()
@@ -122,16 +104,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         {
             EndInvulnerability();
             return;
-        }
-    }
-
-    private void RestoreRendererColors()
-    {
-        if (_renderers == null) return;
-        for (int i = 0; i < _renderers.Length; i++)
-        {
-            if (_renderers[i])
-                _renderers[i].color = _originalColors[i];
         }
     }
 
@@ -149,46 +121,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         _dead = true;
         EndInvulnerability();
         Death?.Invoke();
-    }
-
-    private void ApplyHitRecoil(Vector2 sourcePosition)
-    {
-        if (!_movement) return;
-
-        Vector2 toPlayer = (Vector2)transform.position - sourcePosition;
-        if (toPlayer.sqrMagnitude < 0.0001f)
-            toPlayer = _movement.FacingRight ? Vector2.right : Vector2.left;
-
-        float absX = Mathf.Abs(toPlayer.x);
-        float absY = Mathf.Abs(toPlayer.y);
-
-        bool verticalBounce = absY > absX && toPlayer.y > 0f;
-        if (verticalBounce)
-        {
-            float horizontalSign = Mathf.Sign(toPlayer.x);
-            if (Mathf.Abs(toPlayer.x) < _tinySeparationThreshold)
-            {
-                horizontalSign = _movement.FacingRight ? 1f : -1f;
-                horizontalSign *= _minSeparationPushMultiplier;
-            }
-
-            Vector2 recoil = new Vector2(horizontalSign*_verticalBounceHorizontalNudge, _verticalBounceVelocity);
-            _movement.ApplyRecoil(recoil, _verticalBounceRecoilDuration, overrideX: true, overrideY: true);
-        }
-        else
-        {
-            float horizontalSign = Mathf.Sign(toPlayer.x);
-            if (horizontalSign == 0f)
-                horizontalSign = _movement.FacingRight ? -1f : 1f;
-
-            float hSpeed = _horizontalHitRecoilSpeed;
-            if (Mathf.Abs(toPlayer.x) < _tinySeparationThreshold)
-                hSpeed *= _minSeparationPushMultiplier;
-
-            float yVel = Mathf.Max(_movement.VerticalSpeed, _horizontalHitVerticalBoost);
-            Vector2 recoil = new Vector2(horizontalSign*hSpeed, yVel);
-            _movement.ApplyRecoil(recoil, _horizontalHitRecoilDuration, overrideX: true, overrideY: true);
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -213,12 +145,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             return;
 
         int dmg = 1;
-        if (dealer)
-            dmg = dealer.Damage;
-        else
-        {
-            dmg = 1;
-        }
+        dmg = dealer ? dealer.Damage : 1;
 
         Transform source = dealer ? dealer.SourceTransform : (enemy ? enemy.transform : other.transform);
         TakeDamage(dmg, source);
