@@ -16,6 +16,7 @@ public class EnemyBase : Damageable
     {
         _dropper.DropNow();
         CameraManager.Instance.ShakeCamera(1f);
+        HitPause.Instance?.Do(0.1f);
         base.Die();
     }
 }

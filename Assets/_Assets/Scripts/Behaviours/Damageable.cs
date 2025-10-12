@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(DamageFlash))]
@@ -11,7 +12,7 @@ public class Damageable : MonoBehaviour, IHittable
     public bool WasHit { get; set; }
     public float UpwardForce { get => _upwardForce; set => _upwardForce = value; }
 
-    [SerializeField] protected int _currentHealth;
+    [SerializeField, ReadOnly] protected int _currentHealth;
     [SerializeField] protected int _maxHealth = 3;
     [SerializeField] protected float _invincibilityDuration = 0.2f;
 

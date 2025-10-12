@@ -70,8 +70,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         StartInvulnerability();
         _damageFlash.Flash();
-        Damaged?.Invoke();
 
+        HitPause.Instance?.Do(0.06f);
+
+        Damaged?.Invoke();
         if (source && _recoil)
             _recoil.ApplyHitRecoilFromSource(source.position);
 
@@ -117,9 +119,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     private void Die()
     {
-        if (_dead) return;
+        if (_dead)
+            return;
         _dead = true;
         EndInvulnerability();
+
+        HitPause.Instance?.Do(0.12f);
+
         Death?.Invoke();
     }
 
