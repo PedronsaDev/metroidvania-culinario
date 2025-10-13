@@ -41,7 +41,7 @@ public class PlayerAttack : MonoBehaviour
     [Header("Hit Filtering")]
     [SerializeField, Range(0f, 1f)] private float _verticalFilterTolerance = 0.05f;
     [SerializeField] private bool _useCenterForVerticalFilter = true;
-    [SerializeField] private bool _skipVerticalFilter = false;
+    [SerializeField] private bool _skipVerticalFilter;
 
     [Header("Runtime Debug State (Read Only)")]
     [SerializeField, ReadOnly] private int _lastAcceptedCount;
@@ -69,7 +69,20 @@ public class PlayerAttack : MonoBehaviour
 
     private enum AttackDir { Left, Right, Down, Up }
 
-    private AttackDir _lastAttackDir;
+    public enum VerticalFilterMode { None, Above, Below }
+
+    public struct OverlapDamageResult
+    {
+        public bool AnyHit;
+        public int AcceptedCount;
+        public int RejectedCount;
+        public int EffectiveCount;
+        public int InvulnerableCount;
+        public bool Truncated;
+        public float MaxUpwardForce;
+        public bool AnyGiveUpward;
+    }
+
     private float _attackVisualTimer;
     private Vector2 _lastAttackCenter;
     private Vector2 _lastAttackSize;
@@ -160,7 +173,6 @@ public class PlayerAttack : MonoBehaviour
     {
         _nextAttackTime = Time.time + _attackCooldown;
         AttackStarted?.Invoke();
-        _lastAttackDir = dir;
         _attackVisualTimer = _debugAttackVisualTime;
 
         _lastAttackValid = false;
@@ -204,33 +216,41 @@ public class PlayerAttack : MonoBehaviour
         return Mathf.Min(count, _hitBuffer.Length);
     }
 
-    private void DoHorizontalAttack(bool right)
+    public OverlapDamageResult DealDamageInBox(Vector2 center, Vector2 size, VerticalFilterMode verticalMode = VerticalFilterMode.None, Vector3? fixedDirection = null, int? damageOverride = null)
+    {
+        return DealDamageInBoxInternal(transform.position, center, size, verticalMode, fixedDirection, damageOverride);
+    }
+
+    private OverlapDamageResult DealDamageInBoxInternal(Vector2 origin, Vector2 center, Vector2 size, VerticalFilterMode verticalMode, Vector3? fixedDirection, int? damageOverride)
     {
         if (_hitBuffer == null || _hitBuffer.Length == 0)
             AllocateBuffer();
-
-        Vector2 origin = transform.position;
-        Vector2 center = origin + new Vector2((right ? 1f : -1f)*_horizontalForwardOffset, 0f);
-        _lastAttackCenter = center;
-        _lastAttackSize = _horizontalSize;
-        _lastAttackValid = true;
 
         if (_debugGizmos)
         {
             _debugAccepted.Clear();
             _debugRejected.Clear();
+            _debugInvulnerable.Clear();
             _debugTruncated = false;
         }
 
-        int count = OverlapBox(center, _horizontalSize);
-        bool truncated = count >= _hitBuffer.Length;
-        bool anyHit = false;
+        int count = OverlapBox(center, size);
+        bool truncated = count >= _hitBufferCapacity;
         HashSet<IHittable> processed = new();
+
         _lastAcceptedCount = 0;
         _lastRejectedCount = 0;
         _lastEffectiveCount = 0;
         _lastInvulnerableCount = 0;
-        _debugInvulnerable.Clear();
+
+        float threshYAbove = origin.y + _verticalFilterTolerance;
+        float threshYBelow = origin.y - _verticalFilterTolerance;
+
+        bool anyHit = false;
+        float maxUpForce = 0f;
+        bool anyGiveUp = false;
+        int dmg = damageOverride ?? _damage;
+
         for (int i = 0; i < count; i++)
         {
             var col = _hitBuffer[i];
@@ -243,25 +263,56 @@ public class PlayerAttack : MonoBehaviour
                 _lastRejectedCount++;
                 continue;
             }
+
+            if (!_skipVerticalFilter && verticalMode != VerticalFilterMode.None)
+            {
+                bool pass = true;
+                if (verticalMode == VerticalFilterMode.Above)
+                {
+                    pass = _useCenterForVerticalFilter ? (col.bounds.center.y >= threshYAbove) : (col.bounds.min.y >= threshYAbove);
+                }
+                else if (verticalMode == VerticalFilterMode.Below)
+                {
+                    pass = _useCenterForVerticalFilter ? (col.bounds.center.y <= threshYBelow) : (col.bounds.max.y <= threshYBelow);
+                }
+                if (!pass)
+                {
+                    if (_debugGizmos) _debugRejected.Add(col);
+                    _lastRejectedCount++;
+                    continue;
+                }
+            }
+
             IHittable hittable = col.GetComponentInParent<IHittable>();
             if (hittable == null)
             {
-                if (_debugGizmos)
-                    _debugRejected.Add(col);
-
+                if (_debugGizmos) _debugRejected.Add(col);
                 _lastRejectedCount++;
                 continue;
             }
             if (!processed.Add(hittable))
             {
-                if (_debugGizmos)
-                    _debugRejected.Add(col);
+                if (_debugGizmos) _debugRejected.Add(col);
                 continue;
             }
+
             Vector3 hitPoint = col.bounds.ClosestPoint(origin);
-            Vector3 dir = (col.bounds.center - (Vector3)origin).normalized;
+            Vector3 dir;
+            if (fixedDirection.HasValue)
+            {
+                dir = fixedDirection.Value;
+            }
+            else
+            {
+                dir = (col.bounds.center - (Vector3)origin);
+                if (dir.sqrMagnitude < 1e-6f)
+                    dir = (_movement && _movement.FacingRight) ? Vector3.right : Vector3.left;
+
+                dir.Normalize();
+            }
+
             bool preWasHit = hittable.WasHit;
-            hittable.Hit(hitPoint, dir, _damage);
+            hittable.Hit(hitPoint, dir, dmg);
             bool effective = !preWasHit && hittable.WasHit;
             if (!effective && preWasHit && _debugGizmos)
                 _debugInvulnerable.Add(col);
@@ -270,19 +321,56 @@ public class PlayerAttack : MonoBehaviour
                 _lastEffectiveCount++;
             else if (preWasHit)
                 _lastInvulnerableCount++;
+
+            if (hittable.GiveUpwardForce && hittable.UpwardForce > 0f)
+            {
+                anyGiveUp = true;
+                if (hittable.UpwardForce > maxUpForce)
+                    maxUpForce = hittable.UpwardForce;
+            }
+
             anyHit = true;
             if (_debugGizmos)
                 _debugAccepted.Add(col);
 
             _lastAcceptedCount++;
         }
-        if (_debugGizmos && truncated) { _debugTruncated = true; }
-        if (anyHit)
+
+        if (_debugGizmos && truncated)
+            _debugTruncated = true;
+
+        return new OverlapDamageResult
+        {
+            AnyHit = anyHit,
+            AcceptedCount = _lastAcceptedCount,
+            RejectedCount = _lastRejectedCount,
+            EffectiveCount = _lastEffectiveCount,
+            InvulnerableCount = _lastInvulnerableCount,
+            Truncated = truncated,
+            MaxUpwardForce = maxUpForce,
+            AnyGiveUpward = anyGiveUp
+        };
+    }
+
+    private void DoHorizontalAttack(bool right)
+    {
+        if (_hitBuffer == null || _hitBuffer.Length == 0)
+            AllocateBuffer();
+
+        Vector2 origin = transform.position;
+        Vector2 center = origin + new Vector2((right ? 1f : -1f)*_horizontalForwardOffset, 0f);
+        _lastAttackCenter = center;
+        _lastAttackSize = _horizontalSize;
+        _lastAttackValid = true;
+
+        var result = DealDamageInBoxInternal(origin, center, _horizontalSize, VerticalFilterMode.None, null, null);
+
+        if (result.AnyHit)
         {
             if (_recoil)
                 _recoil.AttackHorizontalRecoil(right);
             AttackHit?.Invoke(false);
-            AttackResolved?.Invoke(true, _lastAcceptedCount);
+            AttackResolved?.Invoke(true, result.AcceptedCount);
         }
         else
         {
@@ -290,8 +378,8 @@ public class PlayerAttack : MonoBehaviour
             AttackHit?.Invoke(false);
         }
 #if UNITY_EDITOR
-        if (_debugGizmos && truncated)
-            Debug.LogWarning($"Horizontal hit buffer truncated at capacity {_hitBuffer.Length}.");
+        if (_debugGizmos && result.Truncated)
+            Debug.LogWarning($"Horizontal hit buffer truncated at capacity {_hitBufferCapacity}.");
 #endif
     }
 
@@ -305,89 +393,20 @@ public class PlayerAttack : MonoBehaviour
         _lastAttackCenter = center;
         _lastAttackSize = _downSize;
         _lastAttackValid = true;
-        if (_debugGizmos)
-        {
-            _debugAccepted.Clear();
-            _debugRejected.Clear();
-            _debugTruncated = false;
-        }
 
-        int count = OverlapBox(center, _downSize);
-        bool truncated = count >= _hitBuffer.Length;
-        bool pogo = false;
-        HashSet<IHittable> processed = new();
-        _lastAcceptedCount = 0;
-        _lastRejectedCount = 0;
-        _lastEffectiveCount = 0;
-        _lastInvulnerableCount = 0;
-        _debugInvulnerable.Clear();
-        float threshY = origin.y - _verticalFilterTolerance;
-        for (int i = 0; i < count; i++)
-        {
-            var col = _hitBuffer[i];
-            if (col == null) continue;
-            if (col.attachedRigidbody && col.attachedRigidbody.gameObject == gameObject)
-            {
-                if (_debugGizmos) _debugRejected.Add(col);
-                _lastRejectedCount++;
-                continue;
-            }
-            bool below;
-            if (_skipVerticalFilter)
-                below = true;
-            else if (_useCenterForVerticalFilter)
-                below = col.bounds.center.y <= threshY;
-            else
-                below = col.bounds.max.y <= threshY;
-            if (!below)
-            {
-                if (_debugGizmos) _debugRejected.Add(col);
-                _lastRejectedCount++;
-                continue;
-            }
-            IHittable hittable = col.GetComponentInParent<IHittable>();
-            if (hittable == null)
-            {
-                if (_debugGizmos) _debugRejected.Add(col);
-                continue;
-            }
-            if (!processed.Add(hittable))
-            {
-                if (_debugGizmos) _debugRejected.Add(col);
-                continue;
-            }
-            Vector3 hitPoint = col.bounds.ClosestPoint(origin);
-            bool preWasHit = hittable.WasHit;
-            hittable.Hit(hitPoint, Vector3.down, _damage);
-            bool effective = !preWasHit && hittable.WasHit;
-            if (!effective && preWasHit && _debugGizmos)
-                _debugInvulnerable.Add(col);
-            if (effective)
-                _lastEffectiveCount++;
-            else if (preWasHit)
-                _lastInvulnerableCount++;
+        var result = DealDamageInBoxInternal(origin, center, _downSize, VerticalFilterMode.Below, Vector3.down, null);
 
-            pogo = true;
-            if (_debugGizmos)
-                _debugAccepted.Add(col);
-
-            _lastAcceptedCount++;
-        }
-        if (_debugGizmos && truncated)
-            _debugTruncated = true;
-        if (pogo)
+        if (result.AnyHit)
         {
             float upVel = 0f;
-            if (_respectTargetUpwardForceFlag)
+            if (_respectTargetUpwardForceFlag && result.AnyGiveUpward)
             {
-                foreach (var h in processed)
-                    if (h.GiveUpwardForce && h.UpwardForce > 0f)
-                        upVel = Mathf.Max(upVel, h.UpwardForce);
+                upVel = Mathf.Max(0f, result.MaxUpwardForce);
             }
             if (_recoil)
                 _recoil.PogoRecoil(upVel);
             AttackHit?.Invoke(true);
-            AttackResolved?.Invoke(true, _lastAcceptedCount);
+            AttackResolved?.Invoke(true, result.AcceptedCount);
         }
         else
         {
@@ -395,8 +414,8 @@ public class PlayerAttack : MonoBehaviour
             AttackHit?.Invoke(false);
         }
 #if UNITY_EDITOR
-        if (_debugGizmos && truncated)
-            Debug.LogWarning($"Down attack hit buffer truncated at capacity {_hitBuffer.Length}.");
+        if (_debugGizmos && result.Truncated)
+            Debug.LogWarning($"Down attack hit buffer truncated at capacity {_hitBufferCapacity}.");
 #endif
     }
 
@@ -408,82 +427,13 @@ public class PlayerAttack : MonoBehaviour
         _lastAttackCenter = center;
         _lastAttackSize = _upSize;
         _lastAttackValid = true;
-        if (_debugGizmos)
-        {
-            _debugAccepted.Clear();
-            _debugRejected.Clear();
-            _debugTruncated = false;
-        }
-        int count = OverlapBox(center, _upSize);
-        bool truncated = count >= _hitBuffer.Length;
-        bool anyHit = false;
-        HashSet<IHittable> processed = new();
-        _lastAcceptedCount = 0;
-        _lastRejectedCount = 0;
-        _lastEffectiveCount = 0;
-        _lastInvulnerableCount = 0;
-        _debugInvulnerable.Clear();
-        float threshY = origin.y + _verticalFilterTolerance;
-        for (int i = 0; i < count; i++)
-        {
-            var col = _hitBuffer[i];
-            if (!col)
-                continue;
-            if (col.attachedRigidbody && col.attachedRigidbody.gameObject == gameObject)
-            {
-                if (_debugGizmos)
-                    _debugRejected.Add(col);
-                _lastRejectedCount++;
-                continue;
-            }
-            bool above;
 
-            if (_skipVerticalFilter)
-                above = true;
-            else if (_useCenterForVerticalFilter)
-                above = col.bounds.center.y >= threshY;
-            else
-                above = col.bounds.min.y >= threshY;
+        var result = DealDamageInBoxInternal(origin, center, _upSize, VerticalFilterMode.Above, Vector3.up, null);
 
-            if (!above)
-            {
-                if (_debugGizmos) _debugRejected.Add(col);
-                _lastRejectedCount++;
-                continue;
-            }
-            IHittable hittable = col.GetComponentInParent<IHittable>();
-            if (hittable == null)
-            {
-                if (_debugGizmos) _debugRejected.Add(col);
-                continue;
-            }
-            if (!processed.Add(hittable))
-            {
-                if (_debugGizmos) _debugRejected.Add(col);
-                continue;
-            }
-            Vector3 hitPoint = col.bounds.ClosestPoint(origin);
-            bool preWasHit = hittable.WasHit;
-            hittable.Hit(hitPoint, Vector3.up, _damage);
-            bool effective = !preWasHit && hittable.WasHit;
-            if (!effective && preWasHit && _debugGizmos)
-                _debugInvulnerable.Add(col);
-            if (effective)
-                _lastEffectiveCount++;
-            else if (preWasHit)
-                _lastInvulnerableCount++;
-
-            anyHit = true;
-            if (_debugGizmos)
-                _debugAccepted.Add(col);
-
-            _lastAcceptedCount++;
-        }
-        if (_debugGizmos && truncated) { _debugTruncated = true; }
-        AttackResolved?.Invoke(anyHit, _lastAcceptedCount);
+        AttackResolved?.Invoke(result.AnyHit, result.AcceptedCount);
 #if UNITY_EDITOR
-        if (_debugGizmos && truncated)
-            Debug.LogWarning($"Up attack hit buffer truncated at capacity {_hitBuffer.Length}.");
+        if (_debugGizmos && result.Truncated)
+            Debug.LogWarning($"Up attack hit buffer truncated at capacity {_hitBufferCapacity}.");
 #endif
     }
 

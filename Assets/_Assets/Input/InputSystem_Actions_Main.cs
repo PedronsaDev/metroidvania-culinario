@@ -464,7 +464,7 @@ public partial class @InputSystem_Actions_Main: IInputActionCollection2, IDispos
                 {
                     ""name"": ""WASD"",
                     ""id"": ""494a42b7-f464-43a3-9dbd-04a5f139fa20"",
-                    ""path"": ""2DVector"",
+                    ""path"": ""2DVector(mode=1)"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

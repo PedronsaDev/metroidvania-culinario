@@ -36,8 +36,8 @@ MonoBehaviour:
   GroundMask:
     serializedVersion: 2
     m_Bits: 64
-  GroundProbeDistance: 0.06
-  CeilingProbeDistance: 0.06
+  GroundProbeDistance: 0.01
+  CeilingProbeDistance: 0.01
   GroundProbeWidthMultiplier: 0.9
   DebugProbes: 1
   Gravity: -72.66435

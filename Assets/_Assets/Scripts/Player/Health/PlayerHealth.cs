@@ -29,7 +29,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public event Action IFramesStarted;
     public event Action IFramesEnded;
 
-    public bool Invulnerable => _invulnTimer > 0f;
+    private bool _invulnerableOverride;
+    public bool Invulnerable => _invulnTimer > 0f || _invulnerableOverride;
     public int CurrentHealth => _currentHealth;
     public int MaxHealth => _maxHealth;
 
@@ -156,4 +157,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         Transform source = dealer ? dealer.SourceTransform : (enemy ? enemy.transform : other.transform);
         TakeDamage(dmg, source);
     }
+
+    public void SetInvunerability(bool value) => _invulnerableOverride = value;
 }

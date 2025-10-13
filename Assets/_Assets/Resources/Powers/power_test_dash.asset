@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3d27c5e6859f8a478db1b86bdd9210b, type: 3}
+  m_Name: power_test_dash
+  m_EditorClassIdentifier: Assembly-CSharp::DashPowerDefinition
+  DisplayName: Dash maluco
+  Description: 
+  IsPassive: 0
+  ActivateRef: {fileID: -7471211009204490832, guid: af5408b2571d328419ed4ff4de5f6a27, type: 3}
+  DirectionRef: {fileID: 2252610416717769759, guid: af5408b2571d328419ed4ff4de5f6a27, type: 3}
+  Duration: 0.3
+  Speed: 35
+  DashCooldown: 0.35
+  SpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.3
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  AirDashes: 1
+  CoyoteTime: 0.1
+  DisableGravityDuringDash: 1
+  DirectionMode: 0
+  InputDeadzone: 0.2
+  BufferTime: 0.1
+  DamageOnDash: 1
+  DamageAmount: 3
+  DamageKnockback: 5
+  InvulnerabilityDuringDash: 1

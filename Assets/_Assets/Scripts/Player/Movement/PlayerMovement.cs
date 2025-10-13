@@ -40,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
     private bool _inputsSuspended;
 
     private float _recoilTimer;
+    private bool _isGravityDisabled;
 
     public event Action Jumped;
     public event Action Landed;
@@ -47,8 +48,8 @@ public class PlayerMovement : MonoBehaviour
     public event Action Flipped;
 
     public bool Grounded => _grounded;
-    public float HorizontalSpeed => _rb != null ? _rb.linearVelocity.x : 0f;
-    public float VerticalSpeed => _rb != null ? _rb.linearVelocity.y : 0f;
+    public float HorizontalSpeed => _rb ? _rb.linearVelocity.x : 0f;
+    public float VerticalSpeed => _rb ? _rb.linearVelocity.y : 0f;
     public int VerticalStateId => (int)_vState; // 0 grounded, 1 rising, 2 falling
     public bool FacingRight => _facingRight;
     public bool LedgeFallEasing => _ledgeFallActive;
@@ -224,7 +225,7 @@ public class PlayerMovement : MonoBehaviour
         _facingRight = right;
         Flipped?.Invoke();
 
-        var s = transform.localScale;
+        //var s = transform.localScale;
         //s.x *= -1f;
         //transform.localScale = s;
     }
@@ -296,6 +297,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyVerticalPhysics()
     {
+        if (_isGravityDisabled)
+            return;
+
         if (!_grounded && _vState == VerticalState.Grounded)
             _vState = VerticalState.Falling;
 
@@ -416,5 +420,21 @@ public class PlayerMovement : MonoBehaviour
             }
         }
         _recoilTimer = Mathf.Max(_recoilTimer, duration);
+    }
+
+    public void DisableGravity()
+    {
+        _isGravityDisabled = true;
+        _rb.linearVelocityY = 0f;
+    }
+
+    public void EnableGravity()
+    {
+        _isGravityDisabled = false;
+    }
+
+    public void CancelRecoil()
+    {
+        _recoilTimer = 0f;
     }
 }
