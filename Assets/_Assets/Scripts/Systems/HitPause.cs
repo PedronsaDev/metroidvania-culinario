@@ -10,7 +10,7 @@ public sealed class HitPause : MonoBehaviour
     [SerializeField] private float _defaultDuration = 0.06f;
 
     [Header("Resume (Smooth)")]
-    [SerializeField] private float _resumeDuration = 0.08f;
+    [SerializeField] private float _resumeDuration = 0.9f;
     [SerializeField] private Ease _resumeEase = Ease.OutCubic;
 
     private float _baseFixedDeltaTime;
@@ -49,8 +49,10 @@ public sealed class HitPause : MonoBehaviour
 
         if (duration <= 0f) duration = _defaultDuration;
 
-        if (_pauseRoutine != null) StopCoroutine(_pauseRoutine);
-        if (_resumeTween != null && _resumeTween.IsActive()) _resumeTween.Kill();
+        if (_pauseRoutine != null)
+            StopCoroutine(_pauseRoutine);
+        if (_resumeTween != null && _resumeTween.IsActive())
+            _resumeTween.Kill();
 
         _pauseRoutine = StartCoroutine(PauseRoutine(duration));
     }

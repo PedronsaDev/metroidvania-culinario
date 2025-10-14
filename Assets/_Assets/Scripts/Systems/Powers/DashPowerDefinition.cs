@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TheBlackCat.TrailEffect2D;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 [CreateAssetMenu(menuName = "Powers/Dash", fileName = "power_dash")]
@@ -215,6 +216,8 @@ public class DashPowerRuntime : PowerRuntime
         if (_def.InvulnerabilityDuringDash)
             _health.SetInvunerability(true);
 
+        TrailManager.Instance.StartTrail(_controller.Trail.gameObject);
+
 
         Vector2 dir = Vector2.zero;
         if (_def.DirectionMode == DashPowerDefinition.DashDirectionMode.EightWay && _dirAction != null)
@@ -272,6 +275,16 @@ public class DashPowerRuntime : PowerRuntime
 
         if (_def.InvulnerabilityDuringDash)
             _health.SetInvunerability(false);
+
+        TrailManager.Instance.StopTrail(_controller.Trail.gameObject);
+    }
+
+
+    public override void End()
+    {
+        
+
+        base.End();
     }
 
     private static Vector2 SnapEightWay(Vector2 n)

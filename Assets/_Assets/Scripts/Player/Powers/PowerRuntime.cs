@@ -15,4 +15,9 @@ public abstract class PowerRuntime
     public virtual void ActivatePower() { }
     public virtual void Tick() { }
     public virtual void FixedTick() { }
+
+    public virtual void End()
+    {
+        OnPowerEnded?.Invoke();
+    }
 }
