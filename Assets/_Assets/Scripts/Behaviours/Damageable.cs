@@ -16,12 +16,23 @@ public class Damageable : MonoBehaviour, IHittable
     [SerializeField] protected int _maxHealth = 3;
     [SerializeField] protected float _invincibilityDuration = 0.2f;
 
+    [Header("Knockback Settings")]
+    [SerializeField] private bool _enableKnockback = true;
+    [SerializeField, Min(0f), ShowIf("_enableKnockback")] private float _knockbackForce = 8f;
+    [SerializeField, ShowIf("_enableKnockback")] private ForceMode2D _knockbackForceMode = ForceMode2D.Impulse;
+    [SerializeField, ShowIf("_enableKnockback")] private bool _searchRigidbodyInParents = true;
+    [SerializeField, Min(0f), ShowIf("_enableKnockback")] private float _minUpwardComponent = 0f;
+
     private DamageFlash _damageFlash;
+    protected Rigidbody2D Rb;
 
 
     protected virtual void Awake()
     {
         _damageFlash = GetComponent<DamageFlash>();
+        Rb = GetComponent<Rigidbody2D>();
+        if (!Rb && _searchRigidbodyInParents)
+            Rb = GetComponentInParent<Rigidbody2D>();
     }
 
     protected virtual void Start()
@@ -29,7 +40,7 @@ public class Damageable : MonoBehaviour, IHittable
         _currentHealth = _maxHealth;
     }
 
-    public void Hit(Vector3 hitPoint, Vector3 hitDirection, int damage = 1) => TakeDamage(damage);
+    public void Hit(Vector3 hitPoint, Vector3 hitDirection, int damage = 1) => TakeDamage(damage, hitDirection);
 
     public Transform GetTransform() => this.transform;
 
@@ -50,6 +61,68 @@ public class Damageable : MonoBehaviour, IHittable
                 _damageFlash.Flash();
             }
         }
+    }
+
+    public virtual void TakeDamage(int damage, Vector3 hitDirection)
+    {
+        if (_currentHealth <= 0)
+            return;
+
+        bool applied = false;
+        if (!WasHit)
+        {
+            _currentHealth -= damage;
+            if (_currentHealth <= 0)
+            {
+                Die();
+                return;
+            }
+            else
+            {
+                WasHit = true;
+                Invoke(nameof(ResetCanBeHit), _invincibilityDuration);
+                _damageFlash.Flash();
+                applied = true;
+            }
+        }
+
+        if (applied)
+        {
+            ApplyKnockback(hitDirection);
+        }
+    }
+
+    protected virtual void ApplyKnockback(Vector3 hitDirection)
+    {
+        if (!_enableKnockback)
+            return;
+
+        if (!Rb)
+        {
+            Rb = GetComponent<Rigidbody2D>();
+            if (!Rb && _searchRigidbodyInParents)
+                Rb = GetComponentInParent<Rigidbody2D>();
+        }
+        if (!Rb || !Rb || _knockbackForce <= 0f)
+            return;
+
+        Vector2 dir = new Vector2(hitDirection.x, hitDirection.y);
+        if (dir.sqrMagnitude < 1e-6f)
+        {
+            dir = Vector2.right;
+        }
+        dir.Normalize();
+
+        if (_minUpwardComponent > 0f)
+        {
+            if (dir.y < _minUpwardComponent)
+            {
+                dir.y = _minUpwardComponent;
+                dir = dir.normalized;
+            }
+        }
+
+        Rb.AddForce(dir * _knockbackForce, _knockbackForceMode);
     }
 
     protected virtual void ResetCanBeHit()

@@ -36,9 +36,9 @@ MonoBehaviour:
   GroundMask:
     serializedVersion: 2
     m_Bits: 64
-  GroundProbeDistance: 0.01
-  CeilingProbeDistance: 0.01
-  GroundProbeWidthMultiplier: 0.9
+  GroundProbeDistance: 0.05
+  CeilingProbeDistance: 0.05
+  GroundProbeWidthMultiplier: 1
   DebugProbes: 1
   Gravity: -72.66435
   JumpVelocity: 24.70588

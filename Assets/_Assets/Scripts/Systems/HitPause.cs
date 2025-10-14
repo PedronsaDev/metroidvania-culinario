@@ -18,6 +18,8 @@ public sealed class HitPause : MonoBehaviour
     private Coroutine _pauseRoutine;
     private Tween _resumeTween;
 
+    private bool _isPaused => _pauseRoutine != null;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void EnsureInstance()
     {
@@ -42,6 +44,9 @@ public sealed class HitPause : MonoBehaviour
 
     public void Do(float duration = -1f)
     {
+        if (_isPaused)
+            return;
+
         if (duration <= 0f) duration = _defaultDuration;
 
         if (_pauseRoutine != null) StopCoroutine(_pauseRoutine);
