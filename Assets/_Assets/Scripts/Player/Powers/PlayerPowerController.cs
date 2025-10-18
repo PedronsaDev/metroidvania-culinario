@@ -5,18 +5,18 @@ using UnityEngine;
 
 public class PlayerPowerController : MonoBehaviour
 {
+    [Header("Equipped (Read Only)")]
+    [SerializeField, ReadOnly] private PowerDefinition _equipped;
+
+    [Header("Start Equipped (Optional)")]
+    [SerializeField] private PowerDefinition _startEquipped;
 
     private PlayerMovement _movement;
     private PlayerHealth _health;
     private PlayerAttack _attack;
     private TrailInstance _trail;
     private Rigidbody2D _rb;
-
-    [Header("Equipped (Read Only)")]
-    [SerializeField, ReadOnly] private PowerDefinition _equipped;
-
-    [Header("Start Equipped (Optional)")]
-    [SerializeField] private PowerDefinition _startEquipped;
+    private PowerRuntime _runtime;
 
     public event Action<PowerDefinition> PowerEquipped;
     public event Action<PowerDefinition> PowerUnequipped;
@@ -27,15 +27,13 @@ public class PlayerPowerController : MonoBehaviour
     public TrailInstance Trail => _trail ? _trail : (_trail = GetComponentInChildren<TrailInstance>());
     public Rigidbody2D Rb => _rb ? _rb : (_rb = GetComponent<Rigidbody2D>());
 
-    private PowerRuntime _runtime;
-
     private void Awake()
     {
-        if (!_movement) _movement = GetComponent<PlayerMovement>();
-        if (!_health) _health = GetComponent<PlayerHealth>();
-        if (!_attack) _attack = GetComponent<PlayerAttack>();
-        if (!_trail) _trail = GetComponentInChildren<TrailInstance>();
-        if (!_rb) _rb = GetComponent<Rigidbody2D>();
+        _movement = GetComponent<PlayerMovement>();
+        _health = GetComponent<PlayerHealth>();
+        _attack = GetComponent<PlayerAttack>();
+        _trail = GetComponentInChildren<TrailInstance>();
+        _rb = GetComponent<Rigidbody2D>();
     }
 
     private void Start()
@@ -46,13 +44,25 @@ public class PlayerPowerController : MonoBehaviour
         PowerRuntime.OnPowerEnded += Unequip;
     }
 
-    private void OnDestroy() => PowerRuntime.OnPowerEnded -= Unequip;
+    private void OnDestroy()
+    {
+        PowerRuntime.OnPowerEnded -= Unequip;
+    }
+
+    private void Update()
+    {
+        _runtime?.Tick();
+    }
+
+    private void FixedUpdate()
+    {
+        _runtime?.FixedTick();
+    }
 
     private void Equip(PowerDefinition def)
     {
         _runtime = def.CreateRuntime(this);
         _equipped = def;
-
         _runtime.OnEquip();
         PowerEquipped?.Invoke(def);
     }
@@ -67,16 +77,5 @@ public class PlayerPowerController : MonoBehaviour
 
         PowerUnequipped?.Invoke(_equipped);
         _equipped = null;
-    }
-
-
-    private void Update()
-    {
-        _runtime?.Tick();
-    }
-
-    private void FixedUpdate()
-    {
-        _runtime?.FixedTick();
     }
 }

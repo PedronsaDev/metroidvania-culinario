@@ -1,11 +1,12 @@
 ﻿using System;
+
 public abstract class PowerRuntime
 {
     protected PlayerPowerController _controller;
 
     public static event Action OnPowerEnded;
 
-    public PowerRuntime(PlayerPowerController controller)
+    protected PowerRuntime(PlayerPowerController controller)
     {
         _controller = controller;
     }

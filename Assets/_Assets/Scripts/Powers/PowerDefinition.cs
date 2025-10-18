@@ -1,4 +1,3 @@
-using NaughtyAttributes;
 using UnityEngine;
 
 public class PowerDefinition : ScriptableObject
