@@ -2,6 +2,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
+using System.Collections.Generic;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -40,6 +41,22 @@ public class PlayerMovement : MonoBehaviour
     private bool _inputsSuspended;
     private float _recoilTimer;
     private bool _isGravityDisabled;
+
+    // Reusable buffers to avoid GC
+    private readonly Collider2D[] _ceilingHitsBuffer = new Collider2D[8];
+    private readonly Collider2D[] _groundHitsBuffer = new Collider2D[8];
+
+    // Track current ground and one-way effector underfoot
+    private Collider2D _currentGround;
+    private PlatformEffector2D _currentGroundEffector;
+
+    [Header("One-Way Drop")]
+    [Tooltip("How long to ignore collisions with the one-way platform when dropping through.")]
+    [SerializeField, Range(0.05f, 1f)] private float _dropThroughDuration = 0.25f;
+
+    // Colliders temporarily ignored to allow drop-through
+    private readonly List<Collider2D> _dropIgnored = new();
+    private float _dropIgnoreUntil;
 
     public event Action Jumped;
     public event Action Landed;
@@ -92,6 +109,9 @@ public class PlayerMovement : MonoBehaviour
         Enable(_moveAction, false);
         Enable(_jumpAction, false);
         Enable(_runAction, false);
+
+        // Ensure any ignored collisions are restored if disabled while dropping
+        RestoreDropThroughCollisions(force: true);
     }
 
     private void Update()
@@ -118,24 +138,52 @@ public class PlayerMovement : MonoBehaviour
         Vector2 feetCenter = new(_feetCollider.bounds.center.x, _feetCollider.bounds.min.y);
         float width = _feetCollider.bounds.size.x * _config.GroundProbeWidthMultiplier;
 
-        bool hitGround = Physics2D.BoxCast(
-            feetCenter,
-            new Vector2(width, _config.GroundProbeDistance),
-            0f,
-            Vector2.down,
-            _config.GroundProbeDistance,
-            _config.GroundMask).collider;
+        // Ground check: Overlap a thin box below the feet and ignore drop-through colliders
+        Vector2 groundBoxSize2D = new Vector2(width, _config.GroundProbeDistance);
+        Vector2 groundBoxCenter2D = feetCenter + Vector2.down * (_config.GroundProbeDistance * 0.5f);
+        var groundFilter = new ContactFilter2D { useTriggers = false };
+        groundFilter.SetLayerMask(_config.GroundMask);
+        int groundCount = Physics2D.OverlapBox(groundBoxCenter2D, groundBoxSize2D, 0f, groundFilter, _groundHitsBuffer);
 
-        _grounded = (_suppressGroundFrames <= 0) && hitGround;
+        Collider2D foundGround = null;
+        for (int i = 0; i < groundCount; i++)
+        {
+            var col = _groundHitsBuffer[i];
+            if (!col)
+                continue;
+            if (_dropIgnored.Contains(col))
+                continue; // currently dropping through this platform
+            foundGround = col;
+            break;
+        }
+
+        _currentGround = foundGround;
+        _currentGroundEffector = _currentGround ? _currentGround.GetComponent<PlatformEffector2D>() : null;
+        _grounded = (_suppressGroundFrames <= 0) && (_currentGround != null);
 
         Vector2 headCenter = new(_bodyCollider.bounds.center.x, _bodyCollider.bounds.max.y);
-        _headBlocked = Physics2D.BoxCast(
-            headCenter,
-            new Vector2(width, _config.CeilingProbeDistance),
-            0f,
-            Vector2.up,
-            _config.CeilingProbeDistance,
-            _config.GroundMask).collider;
+        // Compute head block by ignoring one-way platforms and any drop-through ignored colliders
+        Vector2 ceilingBoxSize2D = new Vector2(width, _config.CeilingProbeDistance);
+        Vector2 ceilingBoxCenter2D = headCenter + Vector2.up * (_config.CeilingProbeDistance * 0.5f);
+        var filter = new ContactFilter2D { useTriggers = false };
+        filter.SetLayerMask(_config.GroundMask);
+        int hitCount = Physics2D.OverlapBox(ceilingBoxCenter2D, ceilingBoxSize2D, 0f, filter, _ceilingHitsBuffer);
+        bool headBlockedNow = false;
+        for (int i = 0; i < hitCount; i++)
+        {
+            var col = _ceilingHitsBuffer[i];
+            if (!col)
+                continue;
+            if (col == _bodyCollider || col == _feetCollider)
+                continue;
+            if (_dropIgnored.Contains(col))
+                continue;
+            if (IsOneWayPlatformCollider(col))
+                continue;
+            headBlockedNow = true;
+            break;
+        }
+        _headBlocked = headBlockedNow;
 
         if (!_ledgeFallActive && wasGrounded && !_grounded && _suppressGroundFrames == 0 &&
             Mathf.Abs(_rb.linearVelocity.y) < 0.02f)
@@ -332,11 +380,20 @@ public class PlayerMovement : MonoBehaviour
     {
         if (JumpInterceptor != null)
         {
-            foreach (Func<bool> interceptor in JumpInterceptor.GetInvocationList())
+            foreach (Delegate d in JumpInterceptor.GetInvocationList())
             {
-                if (interceptor())
+                if (d is Func<bool> interceptor && interceptor())
                     return;
             }
+        }
+
+        Vector2 move = _moveAction?.ReadValue<Vector2>() ?? Vector2.zero;
+        if (_grounded && move.y < -0.5f && _currentGroundEffector)
+        {
+            Debug.Log("Attempting drop through one-way platform");
+
+            if (TryDropThroughOneWayPlatform())
+                return;
         }
 
         if (CanGroundJump())
@@ -371,6 +428,12 @@ public class PlayerMovement : MonoBehaviour
             _coyoteTimer -= Time.deltaTime;
         if (_suppressGroundFrames > 0)
             _suppressGroundFrames--;
+
+        // Restore collisions after drop-through duration elapses
+        if (_dropIgnored.Count > 0 && Time.time >= _dropIgnoreUntil)
+        {
+            RestoreDropThroughCollisions(force: false);
+        }
     }
 
     private void HandleGameplayBlock()
@@ -449,7 +512,7 @@ public class PlayerMovement : MonoBehaviour
     public void DisableGravity()
     {
         _isGravityDisabled = true;
-        _rb.linearVelocityY = 0f;
+        _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, 0f);
     }
 
     public void EnableGravity()
@@ -460,6 +523,57 @@ public class PlayerMovement : MonoBehaviour
     public void CancelRecoil()
     {
         _recoilTimer = 0f;
+    }
+
+    private bool TryDropThroughOneWayPlatform()
+    {
+        if (!_currentGroundEffector)
+            return false;
+
+        var platformColliders = _currentGroundEffector.GetComponents<Collider2D>();
+        if (platformColliders == null || platformColliders.Length == 0)
+            return false;
+
+        foreach (var col in platformColliders)
+        {
+            if (!col || (!col.usedByEffector && col != _currentGround))
+                continue;
+
+            if (_feetCollider)
+                Physics2D.IgnoreCollision(_feetCollider, col, true);
+            if (_bodyCollider)
+                Physics2D.IgnoreCollision(_bodyCollider, col, true);
+            if (!_dropIgnored.Contains(col))
+                _dropIgnored.Add(col);
+        }
+
+        _dropIgnoreUntil = Time.time + _dropThroughDuration;
+        _suppressGroundFrames = Mathf.Max(_suppressGroundFrames, 3);
+        _grounded = false;
+        _vState = VerticalState.Falling;
+
+        if (_rb.linearVelocity.y > -0.1f)
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, -0.1f);
+
+        return _dropIgnored.Count > 0;
+    }
+
+    private void RestoreDropThroughCollisions(bool force)
+    {
+        if (_dropIgnored.Count == 0)
+            return;
+
+        if (!force && Time.time < _dropIgnoreUntil)
+            return;
+
+        for (int i = 0; i < _dropIgnored.Count; i++)
+        {
+            var col = _dropIgnored[i];
+            if (!col) continue;
+            if (_feetCollider) Physics2D.IgnoreCollision(_feetCollider, col, false);
+            if (_bodyCollider) Physics2D.IgnoreCollision(_bodyCollider, col, false);
+        }
+        _dropIgnored.Clear();
     }
 
     private void OnDrawGizmos()
@@ -483,4 +597,12 @@ public class PlayerMovement : MonoBehaviour
         Vector3 ceilingBoxCenter = headCenter + Vector2.up * (_config.CeilingProbeDistance * 0.5f);
         Gizmos.DrawWireCube(ceilingBoxCenter, ceilingBoxSize);
     }
+
+    private static bool IsOneWayPlatformCollider(Collider2D col)
+    {
+        if (!col) return false;
+        if (col.usedByEffector) return true;
+        return col.GetComponent<PlatformEffector2D>() != null;
+    }
 }
+
