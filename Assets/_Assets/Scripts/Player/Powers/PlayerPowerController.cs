@@ -17,6 +17,7 @@ public class PlayerPowerController : MonoBehaviour
     private TrailInstance _trail;
     private Rigidbody2D _rb;
     private PowerRuntime _runtime;
+    private PlayerAnimationController _animation;
 
     public event Action<PowerDefinition> PowerEquipped;
     public event Action<PowerDefinition> PowerUnequipped;
@@ -26,6 +27,7 @@ public class PlayerPowerController : MonoBehaviour
     public PlayerAttack Attack => _attack ? _attack : (_attack = GetComponent<PlayerAttack>());
     public TrailInstance Trail => _trail ? _trail : (_trail = GetComponentInChildren<TrailInstance>());
     public Rigidbody2D Rb => _rb ? _rb : (_rb = GetComponent<Rigidbody2D>());
+    public PlayerAnimationController Animation => _animation ? _animation : (_animation = GetComponent<PlayerAnimationController>());
 
     private void Awake()
     {
@@ -34,6 +36,7 @@ public class PlayerPowerController : MonoBehaviour
         _attack = GetComponent<PlayerAttack>();
         _trail = GetComponentInChildren<TrailInstance>();
         _rb = GetComponent<Rigidbody2D>();
+        _animation = GetComponent<PlayerAnimationController>();
     }
 
     private void Start()
@@ -63,6 +66,7 @@ public class PlayerPowerController : MonoBehaviour
     {
         _runtime = def.CreateRuntime(this);
         _equipped = def;
+        def.OnEquip(this);
         _runtime.OnEquip();
         PowerEquipped?.Invoke(def);
     }
@@ -75,6 +79,7 @@ public class PlayerPowerController : MonoBehaviour
             _runtime = null;
         }
 
+        _equipped?.OnUnequip(this);
         PowerUnequipped?.Invoke(_equipped);
         _equipped = null;
     }

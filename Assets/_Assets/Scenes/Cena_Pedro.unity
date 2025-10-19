@@ -23646,7 +23646,7 @@ Animator:
   m_GameObject: {fileID: 1981860973578703314}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 67d811d9c365c2e4f80bcdc52c65497b, type: 2}
+  m_Controller: {fileID: 9100000, guid: 8499d0a49389d8d45a02467d8ab0b21f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -23742,6 +23742,7 @@ GameObject:
   - component: {fileID: 2928216733302757591}
   - component: {fileID: 9072713473216374157}
   - component: {fileID: 9072713473216374160}
+  - component: {fileID: 9072713473216374165}
   - component: {fileID: 9072713473216374158}
   - component: {fileID: 6394244704972210751}
   - component: {fileID: 9072713473216374161}
@@ -23789,7 +23790,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53d625b6604443a5ba6bce55d3fc6833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationController
-  _movement: {fileID: 0}
+  _movement: {fileID: 9072713473216374157}
   _animator: {fileID: 0}
   _spriteRenderer: {fileID: 0}
   _movingSpeedThreshold: 0.1
@@ -23892,7 +23893,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPowerController
   _equipped: {fileID: 0}
-  _startEquipped: {fileID: 11400000, guid: 4d42f6e432c8b34438343e6419da352d, type: 2}
+  _startEquipped: {fileID: 11400000, guid: cd8a64fdf7083de4dbe1fe8b4ef1f9be, type: 2}
+--- !u!114 &9072713473216374165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9072713473216374156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0bd1a0ee1644a80be0f091f0c0b4ea4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVisualController
+  _powerController: {fileID: 9072713473216374164}
+  _mainSpriteRenderer: {fileID: 313408941775081717}
+  _animator: {fileID: 8076393888770682949}
+  _defaultAnimator: {fileID: 9100000, guid: 67d811d9c365c2e4f80bcdc52c65497b, type: 2}
+  _defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  _defaultVfx: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

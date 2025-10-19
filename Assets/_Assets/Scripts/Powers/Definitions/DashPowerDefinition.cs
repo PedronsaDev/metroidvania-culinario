@@ -55,6 +55,7 @@ public class DashPowerRuntime : PowerRuntime
     private PlayerMovement _move;
     private PlayerHealth _health;
     private PlayerAttack _attack;
+    private PlayerAnimationController _animation;
 
     private Vector2 _dashDir;
     private float _dashElapsed;
@@ -70,6 +71,7 @@ public class DashPowerRuntime : PowerRuntime
         base.OnEquip();
         _move = _controller.Movement;
         _airDashesRemaining = _def.AirDashes;
+        _animation = _controller.Animation;
 
         if (_def.InvulnerabilityDuringDash)
             _health = _controller.Health;
@@ -223,6 +225,8 @@ public class DashPowerRuntime : PowerRuntime
             _health.SetInvunerability(true);
 
         TrailManager.Instance.StartTrail(_controller.Trail.gameObject);
+        _animation.GetCurrentAnimator().SetBool("Dashing", true);
+        _animation.GetCurrentAnimator().SetTrigger("Dash");
 
         Vector2 dir = Vector2.zero;
         if (_def.DirectionMode == DashPowerDefinition.DashDirectionMode.EightWay && _dirAction != null)
@@ -280,6 +284,7 @@ public class DashPowerRuntime : PowerRuntime
         if (_def.InvulnerabilityDuringDash)
             _health.SetInvunerability(false);
 
+        _animation.GetCurrentAnimator().SetBool("Dashing", false);
         TrailManager.Instance.StopTrail(_controller.Trail.gameObject);
     }
 

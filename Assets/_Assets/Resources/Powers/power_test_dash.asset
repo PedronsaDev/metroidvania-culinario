@@ -14,6 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DashPowerDefinition
   DisplayName: Dash maluco
   Description: 
+  AnimatorController: {fileID: 9100000, guid: 8499d0a49389d8d45a02467d8ab0b21f, type: 2}
+  PowerMaterial: {fileID: 0}
+  ColorTint: {r: 1, g: 1, b: 1, a: 1}
+  PowerVFX: []
   IsPassive: 0
   ActivateRef: {fileID: -7471211009204490832, guid: af5408b2571d328419ed4ff4de5f6a27, type: 3}
   DirectionRef: {fileID: 2252610416717769759, guid: af5408b2571d328419ed4ff4de5f6a27, type: 3}

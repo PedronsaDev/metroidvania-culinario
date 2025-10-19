@@ -93,6 +93,8 @@ public class PlayerAnimationController : MonoBehaviour
         FlipByRotation();
     }
 
+    public Animator GetCurrentAnimator() => _animator;
+
     private void FlipBySprite() => _spriteRenderer.flipX = !_movement.FacingRight;
 
     private void FlipByScale()
