@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7995603270639897346}
   - component: {fileID: 681835712465486698}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Pickup Range
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -48,7 +48,7 @@ CircleCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 5239
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -77,11 +77,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5848425775124920296}
+  - component: {fileID: 6397180777117633539}
   - component: {fileID: 4514651799088098378}
-  - component: {fileID: -143847707023087321}
   - component: {fileID: -1858763821213217727}
   - component: {fileID: -2060158022301808257}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: dropped_item_prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -98,7 +98,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3661951680997557090}
@@ -106,6 +106,31 @@ Transform:
   - {fileID: 7995603270639897346}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6397180777117633539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5056880306916180259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b92cd6d11e024c2585d4641ce9c7d3ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractablePickup
+  _displayName: 
+  _priority: 0
+  _enabled: 1
+  _dropped: {fileID: 0}
+  _quantity: 1
+  _destroyOnPickup: 1
+  _autoSetNameFromItem: 0
+  _autoPickupOnEnter: 1
+  _collectorMask:
+    serializedVersion: 2
+    m_Bits: 2304
+  _onlyPickupIfInventoryAccepts: 1
+  _pickupRadius: 0.75
 --- !u!114 &4514651799088098378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,31 +157,6 @@ MonoBehaviour:
   _maxBounces: 2
   _squashAmount: 0.2
   _squashDuration: 0.08
---- !u!114 &-143847707023087321
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5056880306916180259}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b92cd6d11e024c2585d4641ce9c7d3ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractablePickup
-  _displayName: 
-  _priority: 0
-  _enabled: 1
-  _dropped: {fileID: 0}
-  _quantity: 1
-  _destroyOnPickup: 1
-  _autoSetNameFromItem: 0
-  _autoPickupOnEnter: 1
-  _collectorMask:
-    serializedVersion: 2
-    m_Bits: 2048
-  _onlyPickupIfInventoryAccepts: 1
-  _pickupRadius: 0.75
 --- !u!50 &-1858763821213217727
 Rigidbody2D:
   serializedVersion: 5
@@ -200,7 +200,7 @@ BoxCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 257
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -228,7 +228,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.7, y: 0.7}
   m_EdgeRadius: 0
 --- !u!1 &5403226441744752890
 GameObject:
@@ -240,7 +240,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5929777382384010852}
   - component: {fileID: 44346051386919654}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -257,7 +257,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5848425775124920296}
@@ -330,7 +330,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3661951680997557090}
   - component: {fileID: 7099126508547038035}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Trail
   m_TagString: Untagged
   m_Icon: {fileID: 0}

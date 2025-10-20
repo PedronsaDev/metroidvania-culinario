@@ -390,8 +390,6 @@ public class PlayerMovement : MonoBehaviour
         Vector2 move = _moveAction?.ReadValue<Vector2>() ?? Vector2.zero;
         if (_grounded && move.y < -0.5f && _currentGroundEffector)
         {
-            Debug.Log("Attempting drop through one-way platform");
-
             if (TryDropThroughOneWayPlatform())
                 return;
         }

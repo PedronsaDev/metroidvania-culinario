@@ -19,6 +19,7 @@ MonoBehaviour:
   AirAcceleration: 60
   AirDeceleration: 55
   ApexHorizontalAssist: 0.65
+  TurnDecelMultiplier: 2
   JumpHeight: 4.2
   TimeToApex: 0.34
   GravityReleaseMultiplier: 1.5
@@ -29,7 +30,6 @@ MonoBehaviour:
   LedgeWalkInitialGravityMultiplier: 0.025
   LedgeWalkGravityRampTime: 0.4
   FallingSpeedDampingChangeThreshold: -10
-  TurnDecelMultiplier: 2
   CoyoteTime: 0.1
   JumpBufferTime: 0.12
   ApexEaseTime: 0.08
@@ -39,16 +39,6 @@ MonoBehaviour:
   GroundProbeDistance: 0.05
   CeilingProbeDistance: 0.05
   GroundProbeWidthMultiplier: 1
-  EnableWallMechanics: 1
-  WallMask:
-    serializedVersion: 2
-    m_Bits: 64
-  WallProbeDistance: 0.4
-  WallSlideSpeed: 10
-  WallJumpVelocityX: 6
-  WallJumpVelocityY: 24
-  WallJumpInputLockTime: 0.2
-  WallCoyoteTime: 0.1
-  DebugProbes: 1
+  DebugProbes: 0
   Gravity: -72.66435
   JumpVelocity: 24.70588

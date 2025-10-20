@@ -12,12 +12,12 @@ TagManager:
   - Water
   - UI
   - Ground
-  - Dropped Item
-  - Trigger
+  - 
   - Player
-  - EnemyHitbox
-  - PlayerTrigger
-  - EnemyCollider
+  - 
+  - Enemy
+  - 
+  - 
   - 
   - 
   - 

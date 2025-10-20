@@ -16045,7 +16045,7 @@ Transform:
   m_GameObject: {fileID: 109635199}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5.68, z: 0}
+  m_LocalPosition: {x: 0, y: 10.21, z: 0}
   m_LocalScale: {x: 1, y: 21.58792, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16472,7 +16472,7 @@ GameObject:
   m_Component:
   - component: {fileID: 230411056}
   - component: {fileID: 230411057}
-  m_Layer: 12
+  m_Layer: 10
   m_Name: Collisionbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16935,7 +16935,7 @@ GameObject:
   m_Component:
   - component: {fileID: 366514923}
   - component: {fileID: 366514924}
-  m_Layer: 12
+  m_Layer: 10
   m_Name: Collisionbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17718,7 +17718,7 @@ GameObject:
   m_Component:
   - component: {fileID: 604603832}
   - component: {fileID: 604603833}
-  m_Layer: 12
+  m_Layer: 10
   m_Name: Collisionbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18456,7 +18456,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: -0.12, y: 0}
-  m_Radius: 0.53
+  m_Radius: 0.4
 --- !u!1 &845989875
 GameObject:
   m_ObjectHideFlags: 0
@@ -18467,7 +18467,7 @@ GameObject:
   m_Component:
   - component: {fileID: 845989876}
   - component: {fileID: 845989877}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19945,7 +19945,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1212585763}
   - component: {fileID: 1212585764}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: CameraFollow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20223,7 +20223,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1343982846}
   - component: {fileID: 1343982847}
-  m_Layer: 11
+  m_Layer: 8
   m_Name: PlayerTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22821,7 +22821,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1934757707}
   - component: {fileID: 1934757708}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: Feet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23529,7 +23529,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7858804671314397425}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23548,7 +23548,7 @@ GameObject:
   - component: {fileID: 313408941775081717}
   - component: {fileID: 8076393888770682949}
   - component: {fileID: 8925382321852169249}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23752,7 +23752,7 @@ GameObject:
   - component: {fileID: 4313585510355021708}
   - component: {fileID: 9072713473216374162}
   - component: {fileID: 306543361103445158}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: player_sapo
   m_TagString: Player
   m_Icon: {fileID: 419385456094870383, guid: 0000000000000000d000000000000000, type: 0}
@@ -23824,7 +23824,7 @@ MonoBehaviour:
   _upSize: {x: 2.4, y: 2.5}
   _upOffset: 1.3
   _respectTargetUpwardForceFlag: 1
-  _debugGizmos: 1
+  _debugGizmos: 0
   _debugAttackVisualTime: 0.25
   _hitBufferCapacity: 4
   _verticalFilterTolerance: 0.05

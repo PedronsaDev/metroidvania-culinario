@@ -56,12 +56,6 @@ public class BeeEnemy : EnemyBase
 
     void Update()
     {
-        if (!_player)
-        {
-            var found = GameObject.FindGameObjectWithTag("Player");
-            if (found) _player = found.transform;
-        }
-
         if (!_prevWasHit && WasHit)
             _stunUntil = Mathf.Max(_stunUntil, Time.time + _knockbackPauseDuration);
 

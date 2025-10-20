@@ -159,4 +159,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     }
 
     public void SetInvunerability(bool value) => _invulnerableOverride = value;
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = _invulnerable ? Color.white : Color.green;
+
+        Gizmos.DrawSphere(transform.position + Vector3.up * 1.5f, 0.2f);
+    }
 }

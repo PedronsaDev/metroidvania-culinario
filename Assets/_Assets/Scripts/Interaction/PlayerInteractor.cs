@@ -97,4 +97,5 @@ public class PlayerInteractor : MonoBehaviour, IItemCollector
     {
         _inventory.AddItem(item, quantity);
     }
+    public GameObject GetInitiatorObject() => this.gameObject;
 }

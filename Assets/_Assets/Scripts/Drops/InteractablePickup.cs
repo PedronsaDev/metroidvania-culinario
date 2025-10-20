@@ -47,19 +47,19 @@ public class InteractablePickup : InteractableBase
         if (!_dropped.IsPickable)
             return;
 
+
         Collider2D hit = Physics2D.OverlapCircle(transform.position, _pickupRadius, _collectorMask);
 
         if (!hit)
             return;
 
-        //hit.TryGetComponent<IItemCollector>(out var collector);
-
-        var collector = hit.transform.parent.gameObject.GetComponent<IItemCollector>();
+        if (!hit.TryGetComponent(out IItemCollector collector))
+            collector = hit.transform.parent.gameObject.GetComponent<IItemCollector>();
 
         if (_onlyPickupIfInventoryAccepts && (collector == null || !collector.CanAccept(_dropped.Payload, _quantity)))
             return;
 
-        var ctx = new InteractionContext(hit.transform.parent.gameObject, (Vector2)transform.position, Time.time);
+        var ctx = new InteractionContext(collector.GetInitiatorObject(), (Vector2)transform.position, Time.time);
         Interact(in ctx);
     }
 
@@ -118,14 +118,12 @@ public class InteractablePickup : InteractableBase
         if (((1 << other.gameObject.layer) & _collectorMask) == 0)
             return;
 
-        //var collector = other.GetComponent<IItemCollector>();
-
-        var collector = other.transform.parent.gameObject.GetComponent<IItemCollector>();
+        var collector = other.transform.gameObject.GetComponentInParent<IItemCollector>();
 
         if (_onlyPickupIfInventoryAccepts && (collector == null || !collector.CanAccept(_dropped.Payload, _quantity)))
             return;
 
-        var ctx = new InteractionContext(other.transform.parent.gameObject, (Vector2)transform.position, Time.time);
+        var ctx = new InteractionContext(collector.GetInitiatorObject(), (Vector2)transform.position, Time.time);
         Interact(in ctx);
     }
 
