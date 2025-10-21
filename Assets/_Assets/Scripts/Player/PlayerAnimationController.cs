@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using DG.Tweening;
 
 [DisallowMultipleComponent]
 public class PlayerAnimationController : MonoBehaviour
@@ -7,12 +8,43 @@ public class PlayerAnimationController : MonoBehaviour
     [SerializeField] private PlayerMovement _movement;
     [SerializeField] private Animator _animator;
     [SerializeField] private SpriteRenderer _spriteRenderer;
+    [SerializeField] private PlayerHealth _health;
 
     [Header("Thresholds")]
     [SerializeField] private float _movingSpeedThreshold = 0.1f;
 
     [Range(0f, 1f)]
     [SerializeField] private float _horizontalSmoothing = 0.15f;
+
+    [Header("Squash & Stretch")]
+    [SerializeField] private Transform _squashTarget;
+
+    [Header("Jump Squash")]
+    [SerializeField, Min(0.2f)] private float _jumpXMult = 0.9f;
+    [SerializeField, Min(0.2f)] private float _jumpYMult = 1.1f;
+    [SerializeField, Min(0.01f)] private float _jumpInDuration = 0.06f;
+    [SerializeField, Min(0.01f)] private float _jumpOutDuration = 0.12f;
+    [SerializeField] private Ease _jumpInEase = Ease.OutQuad;
+    [SerializeField] private Ease _jumpOutEase = Ease.OutBack;
+    [SerializeField] private bool _jumpUnscaledTime;
+
+    [Header("Land Squash")]
+    [SerializeField, Min(0.2f)] private float _landXMult = 1.15f;
+    [SerializeField, Min(0.2f)] private float _landYMult = 0.85f;
+    [SerializeField, Min(0.01f)] private float _landInDuration = 0.05f;
+    [SerializeField, Min(0.01f)] private float _landOutDuration = 0.12f;
+    [SerializeField] private Ease _landInEase = Ease.OutQuad;
+    [SerializeField] private Ease _landOutEase = Ease.OutBack;
+    [SerializeField] private bool _landUnscaledTime;
+
+    [Header("Hit Squash")]
+    [SerializeField, Min(0.2f)] private float _hitXMult = 1.2f;
+    [SerializeField, Min(0.2f)] private float _hitYMult = 0.8f;
+    [SerializeField, Min(0.01f)] private float _hitInDuration = 0.06f;
+    [SerializeField, Min(0.01f)] private float _hitOutDuration = 0.12f;
+    [SerializeField] private Ease _hitInEase = Ease.OutQuad;
+    [SerializeField] private Ease _hitOutEase = Ease.OutBack;
+    [SerializeField] private bool _hitUnscaledTime = true;
 
     [Header("Debug")]
     [SerializeField] private bool _debugLogEvents;
@@ -29,11 +61,15 @@ public class PlayerAnimationController : MonoBehaviour
 
     private float _smoothedAbsX;
 
+    private Tween _squashTween;
+
     private void Reset()
     {
         if (!_movement) _movement = GetComponent<PlayerMovement>();
         if (!_animator) _animator = GetComponentInChildren<Animator>();
         if (!_spriteRenderer) _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (!_health) _health = GetComponent<PlayerHealth>();
+        if (!_squashTarget && _spriteRenderer) _squashTarget = _spriteRenderer.transform;
     }
 
     private void Awake()
@@ -41,6 +77,8 @@ public class PlayerAnimationController : MonoBehaviour
         if (!_movement) _movement = GetComponent<PlayerMovement>();
         if (!_animator) _animator = GetComponentInChildren<Animator>();
         if (!_spriteRenderer) _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (!_health) _health = GetComponent<PlayerHealth>();
+        if (!_squashTarget && _spriteRenderer) _squashTarget = _spriteRenderer.transform;
         CacheHashes();
     }
 
@@ -51,6 +89,10 @@ public class PlayerAnimationController : MonoBehaviour
             _movement.Jumped += OnJumped;
             _movement.Landed += OnLanded;
         }
+        if (_health)
+        {
+            _health.Damaged += OnDamaged;
+        }
     }
 
     private void OnDisable()
@@ -59,6 +101,16 @@ public class PlayerAnimationController : MonoBehaviour
         {
             _movement.Jumped -= OnJumped;
             _movement.Landed -= OnLanded;
+        }
+        if (_health)
+        {
+            _health.Damaged -= OnDamaged;
+        }
+
+        if (_squashTween != null && _squashTween.IsActive())
+        {
+            _squashTween.Kill();
+            TryRestoreScale();
         }
     }
 
@@ -122,6 +174,8 @@ public class PlayerAnimationController : MonoBehaviour
         _animator.ResetTrigger(_tLand);
         _animator.SetTrigger(_tJump);
         if (_debugLogEvents) Debug.Log("[Anim] Jump trigger");
+
+        DoSquash(_jumpXMult, _jumpYMult, _jumpInDuration, _jumpOutDuration, _jumpInEase, _jumpOutEase, _jumpUnscaledTime);
     }
 
     private void OnLanded()
@@ -130,5 +184,44 @@ public class PlayerAnimationController : MonoBehaviour
         _animator.ResetTrigger(_tJump);
         _animator.SetTrigger(_tLand);
         if (_debugLogEvents) Debug.Log("[Anim] Land trigger");
+
+        DoSquash(_landXMult, _landYMult, _landInDuration, _landOutDuration, _landInEase, _landOutEase, _landUnscaledTime);
+    }
+
+    private void OnDamaged()
+    {
+        DoSquash(_hitXMult, _hitYMult, _hitInDuration, _hitOutDuration, _hitInEase, _hitOutEase, _hitUnscaledTime);
+    }
+
+    private void DoSquash(float xMult, float yMult, float inDuration, float outDuration, Ease inEase, Ease outEase, bool useUnscaled)
+    {
+        if (!_squashTarget)
+            _squashTarget = _spriteRenderer ? _spriteRenderer.transform : transform;
+
+        _squashTween?.Kill();
+
+        Vector3 s = Vector3.one;
+        float signX = Mathf.Approximately(s.x, 0f) ? 1f : Mathf.Sign(s.x);
+        Vector3 abs = new Vector3(Mathf.Abs(s.x), Mathf.Abs(s.y), Mathf.Abs(s.z));
+
+        Vector3 peak = new Vector3(Mathf.Max(0.01f, xMult)*abs.x*signX,
+                                   Mathf.Max(0.01f, yMult)*abs.y,
+                                   abs.z);
+        Vector3 rest = new Vector3(abs.x*signX, abs.y, abs.z);
+
+        var seq = DOTween.Sequence();
+        seq.Append(_squashTarget.DOScale(peak, inDuration).SetEase(inEase));
+        seq.Append(_squashTarget.DOScale(rest, outDuration).SetEase(outEase));
+        seq.SetUpdate(useUnscaled);
+        _squashTween = seq;
+    }
+
+    private void TryRestoreScale()
+    {
+        if (!_squashTarget) return;
+        Vector3 s = _squashTarget.localScale;
+        float signX = Mathf.Approximately(s.x, 0f) ? 1f : Mathf.Sign(s.x);
+        Vector3 abs = new Vector3(Mathf.Abs(s.x), Mathf.Abs(s.y), Mathf.Abs(s.z));
+        _squashTarget.localScale = new Vector3(abs.x*signX, abs.y, abs.z);
     }
 }

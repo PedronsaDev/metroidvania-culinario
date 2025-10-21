@@ -596,11 +596,13 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(ceilingBoxCenter, ceilingBoxSize);
     }
 
-    private static bool IsOneWayPlatformCollider(Collider2D col)
+    public static bool IsOneWayPlatformCollider(Collider2D col)
     {
-        if (!col) return false;
-        if (col.usedByEffector) return true;
-        return col.GetComponent<PlatformEffector2D>() != null;
+        if (!col)
+            return false;
+        if (col.usedByEffector)
+            return true;
+        return col.GetComponent<PlatformEffector2D>();
     }
 }
 

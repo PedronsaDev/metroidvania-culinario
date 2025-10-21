@@ -41,6 +41,7 @@ public class WallJumpPowerRuntime : PowerRuntime
     private float _wallCoyoteTimer;
     private float _wallJumpInputLockTimer;
     private bool _wallJumpPerformed;
+    private bool _valid;
 
     public WallJumpPowerRuntime(PlayerPowerController controller, WallJumpPowerDefinition def) : base(controller)
     {
@@ -125,7 +126,9 @@ public class WallJumpPowerRuntime : PowerRuntime
             _def.WallMask);
         _onWallRight = hitRight.collider;
 
-        if (_onWallLeft || _onWallRight)
+        _valid = !PlayerMovement.IsOneWayPlatformCollider(hitRight.collider) || !PlayerMovement.IsOneWayPlatformCollider(hitLeft.collider);
+
+        if (_onWallLeft || _onWallRight && _valid)
             _wallCoyoteTimer = _def.WallCoyoteTime;
 
         if (_move && _move.Grounded)
@@ -169,6 +172,8 @@ public class WallJumpPowerRuntime : PowerRuntime
 
     private bool CanWallSlide()
     {
+        if (!_valid)
+            return false;
         if (!_move || !_rb)
             return false;
         if (_move.Grounded)
@@ -205,7 +210,7 @@ public class WallJumpPowerRuntime : PowerRuntime
 
     private bool CanWallJump()
     {
-        if (!_move || _move.Grounded || !CanWallSlide())
+        if (!_move || _move.Grounded || !CanWallSlide() || !_valid)
             return false;
         return _onWallLeft || _onWallRight || _wallCoyoteTimer > 0f;
     }

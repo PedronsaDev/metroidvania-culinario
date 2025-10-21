@@ -21,7 +21,7 @@ public class Damageable : MonoBehaviour, IHittable
     [SerializeField, Min(0f), ShowIf("_enableKnockback")] private float _knockbackForce = 8f;
     [SerializeField, ShowIf("_enableKnockback")] private ForceMode2D _knockbackForceMode = ForceMode2D.Impulse;
     [SerializeField, ShowIf("_enableKnockback")] private bool _searchRigidbodyInParents = true;
-    [SerializeField, Min(0f), ShowIf("_enableKnockback")] private float _minUpwardComponent = 0f;
+    [SerializeField, Min(0f), ShowIf("_enableKnockback")] private float _minUpwardComponent;
 
     private DamageFlash _damageFlash;
     protected Rigidbody2D Rb;
@@ -59,6 +59,7 @@ public class Damageable : MonoBehaviour, IHittable
                 WasHit = true;
                 Invoke(nameof(ResetCanBeHit), _invincibilityDuration);
                 _damageFlash.Flash();
+                OnDamageApplied(Vector3.zero, damage);
             }
         }
     }
@@ -88,9 +89,12 @@ public class Damageable : MonoBehaviour, IHittable
 
         if (applied)
         {
+            OnDamageApplied(hitDirection, damage);
             ApplyKnockback(hitDirection);
         }
     }
+
+    protected virtual void OnDamageApplied(Vector3 hitDirection, int damage) { }
 
     protected virtual void ApplyKnockback(Vector3 hitDirection)
     {

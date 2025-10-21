@@ -82,7 +82,7 @@ namespace TheBlackCat.TrailEffect2D
         /// <param name="obj">The game object to spawn trail.</param>
         public void StartTrail(GameObject obj)
         {
-            if (obj == null)
+            if (!obj)
             {
 #if UNITY_EDITOR
                 Debug.LogWarning("The game object is null.");
@@ -92,7 +92,7 @@ namespace TheBlackCat.TrailEffect2D
 
             TrailInstance instance = obj.TryGetComponent(out TrailInstance component) ? component : null;
 
-            if (instance == null)
+            if (!instance)
             {
 #if UNITY_EDITOR
                 Debug.LogWarning("The game object does not have a trail instance component.");
