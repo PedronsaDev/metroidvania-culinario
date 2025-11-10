@@ -77,7 +77,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         Damaged?.Invoke();
         if (source && _recoil)
             _recoil.ApplyHitRecoilFromSource(source.position);
-
+        AudioManager.Instance.PlaySFX("player_hurt");
         CheckHealth();
     }
 
@@ -135,26 +135,19 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (_dead || Invulnerable) return;
 
         DamageDealer dealer = other.GetComponent<DamageDealer>();
-        EnemyBase enemy = null;
 
         if (!dealer)
         {
             dealer = other.GetComponentInParent<DamageDealer>();
         }
-        if (!dealer)
-        {
-            other.gameObject.TryGetComponent<EnemyBase>(out enemy);
-            if (!enemy)
-                enemy = other.GetComponentInParent<EnemyBase>();
-        }
 
-        if (!dealer && !enemy)
+        if (!dealer)
             return;
 
         int dmg = 1;
         dmg = dealer ? dealer.Damage : 1;
 
-        Transform source = dealer ? dealer.SourceTransform : (enemy ? enemy.transform : other.transform);
+        Transform source = dealer ? dealer.SourceTransform : other.transform;
         TakeDamage(dmg, source);
     }
 

@@ -82,6 +82,7 @@ public class InteractablePickup : InteractableBase
         if (collector != null && collector.CanAccept(_dropped.Payload, _quantity))
         {
             collector.AddItem(_dropped.Payload, _quantity);
+            AudioManager.Instance.PlaySFX("item_collect");
         }
         else if (!_onlyPickupIfInventoryAccepts)
         {

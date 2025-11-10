@@ -373,6 +373,7 @@ public class PlayerMovement : MonoBehaviour
         _ledgeFallTimer = 0f;
 
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _config.JumpVelocity);
+        AudioManager.Instance.PlaySFX("player_jump");
         Jumped?.Invoke();
     }
 
@@ -427,7 +428,6 @@ public class PlayerMovement : MonoBehaviour
         if (_suppressGroundFrames > 0)
             _suppressGroundFrames--;
 
-        // Restore collisions after drop-through duration elapses
         if (_dropIgnored.Count > 0 && Time.time >= _dropIgnoreUntil)
         {
             RestoreDropThroughCollisions(force: false);

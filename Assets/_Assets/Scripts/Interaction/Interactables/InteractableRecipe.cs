@@ -1,11 +1,10 @@
-using System;
 using DG.Tweening;
 using UnityEngine;
 
 public class InteractableRecipe : InteractableBase
 {
-
     [SerializeField] private Recipe _recipe;
+    //[SerializeField] private AudioClip _unlockSound;
 
     [Header("Hover Animation")]
     [SerializeField] private float _hoverAmplitude = 0.25f;
@@ -41,16 +40,15 @@ public class InteractableRecipe : InteractableBase
         _rotateTween?.Kill();
     }
 
-    public override bool CanInteract(in InteractionContext context) => true;
+    public override bool CanInteract(in InteractionContext context) => !RecipesManager.IsUnlocked(_recipe);
 
     public override void Interact(in InteractionContext context)
     {
         if (RecipesManager.Unlock(_recipe))
         {
-            //Add animation or sound effect here
+            AudioManager.Instance.PlaySFX("recipe_unlock");
             Destroy(this.gameObject);
         }
 
     }
 }
-

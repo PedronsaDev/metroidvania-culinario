@@ -23,6 +23,7 @@ public class EnemyBase : Damageable
     protected override void OnDamageApplied(Vector3 hitDirection, int damage)
     {
         base.OnDamageApplied(hitDirection, damage);
+        AudioManager.Instance.PlaySFX("enemy_hit");
         SquashAndStretch();
     }
 
@@ -60,9 +61,10 @@ public class EnemyBase : Damageable
 
     protected override void Die()
     {
-        _dropper.DropNow();
+        _dropper.TryDrop();
         CameraManager.Instance.ShakeCamera(1f);
         HitPause.Instance?.Do(0.13f);
+        AudioManager.Instance.PlaySFX("enemy_die");
         base.Die();
     }
 

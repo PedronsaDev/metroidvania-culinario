@@ -23,7 +23,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: e3aa222f1e690d94eae61b00b15c16ff, type: 2}
+  m_Motion: {fileID: 7400000, guid: 1889292e7f4055143951c46609e45310, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -49,7 +49,7 @@ AnimatorStateTransition:
   m_TransitionDuration: 0.000000007450581
   m_TransitionOffset: 0
   m_ExitTime: 0.28571436
-  m_HasExitTime: 1
+  m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
@@ -123,9 +123,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.1
-  m_TransitionOffset: 0
-  m_ExitTime: 0.9
+  m_TransitionDuration: 0.12899269
+  m_TransitionOffset: 2.512694
+  m_ExitTime: 0.99664235
   m_HasExitTime: 0
   m_HasFixedDuration: 0
   m_InterruptionSource: 0
@@ -137,7 +137,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: cogumelo
+  m_Name: cogumelo_martelo
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: Walking
@@ -199,7 +199,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 4470820d4ce153f4893539f2934993c5, type: 2}
+  m_Motion: {fileID: 7400000, guid: b1accf46d8ce64c4b8c19db6b41b5431, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -251,7 +251,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: d56dd7f192459ae42ab5f713d084988d, type: 2}
+  m_Motion: {fileID: 7400000, guid: 16edffdcd9d2a0a49b7abb4be69fc514, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

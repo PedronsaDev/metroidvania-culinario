@@ -43,6 +43,9 @@ namespace _Assets.Scripts.Drops
 
         public void TryDrop()
         {
+            if (!_lootTable)
+                return;
+
             if (_dropOnlyOnce && _hasDropped)
                 return;
 

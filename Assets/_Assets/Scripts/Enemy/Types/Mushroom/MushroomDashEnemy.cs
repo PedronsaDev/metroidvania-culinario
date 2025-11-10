@@ -2,7 +2,7 @@ using TheBlackCat.TrailEffect2D;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class MushroomEnemy : EnemyBase
+public class MushroomDashEnemy : EnemyBase
 {
     [Header("Patrol")]
     [SerializeField] private float _patrolSpeed = 1.6f;
@@ -13,9 +13,9 @@ public class MushroomEnemy : EnemyBase
     [SerializeField] private float _groundCheckDistance = 0.1f;
 
     [Header("Detection")]
-    [SerializeField] private float _attackDetectRange = 5f;
+    [SerializeField] private float _detectionRange = 5f;
     [SerializeField] private float _attackCooldown = 2.25f;
-    [SerializeField]private Collider2D _col;
+    [SerializeField] private Collider2D _col;
 
     [Header("Dash (Headbutt)")]
     [SerializeField] private float _windupTime = 0.35f;
@@ -169,13 +169,31 @@ public class MushroomEnemy : EnemyBase
         if (Time.time < _nextAttackTime) return;
         if (!IsGrounded()) return;
 
-        float dist = Vector2.Distance(transform.position, _player.position);
-        if (dist <= _attackDetectRange)
+        if (PlayerDetectedOnSide())
         {
             FaceRight(_player.position.x >= transform.position.x);
             ChangeState(State.Windup);
             _stateUntil = Time.time + _windupTime;
         }
+    }
+
+    private bool PlayerDetectedOnSide()
+    {
+        if (!_player)
+            return false;
+
+        float horizontalDist = Mathf.Abs(_player.position.x - transform.position.x);
+        if (horizontalDist > _detectionRange) return false;
+
+        float verticalDist = Mathf.Abs(_player.position.y - GetBoundsCenterY());
+        float vTolerance = _col ? (_col.bounds.extents.y + 0.25f) : 0.6f;
+        if (verticalDist > vTolerance) return false;
+
+        Vector2 dir = _player.position.x >= transform.position.x ? Vector2.right : Vector2.left;
+        Vector2 origin = new Vector2(GetFrontX(), GetBoundsCenterY());
+
+        RaycastHit2D hit = Physics2D.Raycast(origin, dir, _detectionRange, ~0);
+        return hit.collider && hit.collider.CompareTag("Player");
     }
 
     private void BeginDash()
@@ -290,7 +308,7 @@ public class MushroomEnemy : EnemyBase
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, _attackDetectRange);
+        Gizmos.DrawWireSphere(transform.position, _detectionRange);
 
         Gizmos.color = Color.red;
         Vector2 dir = _facingRight ? Vector2.right : Vector2.left;

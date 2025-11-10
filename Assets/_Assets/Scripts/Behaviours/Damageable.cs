@@ -46,7 +46,6 @@ public class Damageable : MonoBehaviour, IHittable
 
     public virtual void TakeDamage(int damage)
     {
-
         if (!WasHit && _currentHealth > 0)
         {
             _currentHealth -= damage;

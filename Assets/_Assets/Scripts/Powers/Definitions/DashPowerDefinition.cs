@@ -271,6 +271,8 @@ public class DashPowerRuntime : PowerRuntime
 
         if (!_move.Grounded && _airDashesRemaining > 0)
             _airDashesRemaining--;
+
+        AudioManager.Instance.PlaySFX("player_dash");
     }
 
     private void EndDash()

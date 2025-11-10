@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8690368711074e3a99fb2fe7585067a0, type: 3}
+  m_Name: SFXDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::SFXDatabase
+  Entries:
+  - Key: recipe_unlock
+    Clip: {fileID: 8300000, guid: 8e581aa217090144889a0f3046866bb3, type: 3}
+    IsUI: 0
+    Is3D: 0
+    DefaultVolume: 1
+    DefaultPitch: 1
+    PitchVariance: 0
+    VolumeVariance: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 20
+    Loop: 0
+  - Key: enemy_hit
+    Clip: {fileID: 8300000, guid: 3004765ad5391d84eb80950ee2714e99, type: 3}
+    IsUI: 0
+    Is3D: 0
+    DefaultVolume: 1
+    DefaultPitch: 1
+    PitchVariance: 0.4
+    VolumeVariance: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 20
+    Loop: 0
+  - Key: enemy_die
+    Clip: {fileID: 8300000, guid: c5a9b3d257ee30643aaedcdc1e786cc8, type: 3}
+    IsUI: 0
+    Is3D: 0
+    DefaultVolume: 1
+    DefaultPitch: 1
+    PitchVariance: 0
+    VolumeVariance: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 20
+    Loop: 0
+  - Key: player_hurt
+    Clip: {fileID: 8300000, guid: 9d468d7c67367b340b5d819b552c1d57, type: 3}
+    IsUI: 0
+    Is3D: 0
+    DefaultVolume: 1
+    DefaultPitch: 1
+    PitchVariance: 0.4
+    VolumeVariance: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 20
+    Loop: 0
+  - Key: player_jump
+    Clip: {fileID: 8300000, guid: b1e40b603673a33469f9c7d3b4686a60, type: 3}
+    IsUI: 0
+    Is3D: 0
+    DefaultVolume: 1
+    DefaultPitch: 1
+    PitchVariance: 0.2
+    VolumeVariance: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 20
+    Loop: 0
+  - Key: player_dash
+    Clip: {fileID: 8300000, guid: b7387b86547f9cf4793b2b5e3273691b, type: 3}
+    IsUI: 0
+    Is3D: 0
+    DefaultVolume: 1
+    DefaultPitch: 1
+    PitchVariance: 0
+    VolumeVariance: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 20
+    Loop: 0
+  - Key: item_collect
+    Clip: {fileID: 8300000, guid: 9a1312f8c8d27034398de906f35bfb2a, type: 3}
+    IsUI: 0
+    Is3D: 0
+    DefaultVolume: 1
+    DefaultPitch: 1
+    PitchVariance: 0.5
+    VolumeVariance: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 20
+    Loop: 0
