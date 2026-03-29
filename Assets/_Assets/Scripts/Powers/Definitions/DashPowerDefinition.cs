@@ -79,6 +79,8 @@ public class DashPowerRuntime : PowerRuntime
         if (_def.DamageOnDash)
             _attack = _controller.Attack;
 
+        _attack.DisableAttack();
+
         if (_def.ActivateRef)
         {
             _activateAction = _def.ActivateRef.action;
@@ -115,6 +117,8 @@ public class DashPowerRuntime : PowerRuntime
 
         if (_move)
             _move.Landed -= OnLanded;
+
+        _attack.EnableAttack();
     }
 
     public override void Tick()

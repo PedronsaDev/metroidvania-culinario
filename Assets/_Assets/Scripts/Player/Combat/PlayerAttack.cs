@@ -62,7 +62,6 @@ public class PlayerAttack : MonoBehaviour
     private readonly List<Collider2D> _debugInvulnerable = new();
     private bool _debugTruncated;
 
-
     public event Action AttackStarted;
     public event Action<bool> AttackHit;
     public event Action<bool, int> AttackResolved;
@@ -87,6 +86,7 @@ public class PlayerAttack : MonoBehaviour
     private Vector2 _lastAttackCenter;
     private Vector2 _lastAttackSize;
     private bool _lastAttackValid;
+    private bool _canAttack = true;
 
     private void Awake()
     {
@@ -129,6 +129,9 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
+        if (!_canAttack)
+            return;
+
         _attackQueuedThisFrame = false;
         if (_attackVisualTimer > 0f)
         {
@@ -488,4 +491,13 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 #endif
+    public void DisableAttack()
+    {
+        _canAttack = false;
+    }
+
+    public void EnableAttack()
+    {
+        _canAttack = true;
+    }
 }

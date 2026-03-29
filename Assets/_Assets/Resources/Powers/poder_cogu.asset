@@ -19,7 +19,7 @@ MonoBehaviour:
   ColorTint: {r: 1, g: 1, b: 1, a: 1}
   PowerVFX: []
   IsPassive: 0
-  ActivateRef: {fileID: -7471211009204490832, guid: af5408b2571d328419ed4ff4de5f6a27, type: 3}
+  ActivateRef: {fileID: 1120369429361536294, guid: af5408b2571d328419ed4ff4de5f6a27, type: 3}
   DirectionRef: {fileID: 2252610416717769759, guid: af5408b2571d328419ed4ff4de5f6a27, type: 3}
   Duration: 0.3
   Speed: 35
