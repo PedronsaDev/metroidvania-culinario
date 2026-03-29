@@ -13,7 +13,8 @@ public class PauseMenuUI : BaseUIWindow
 
     public void QuitToMainMenu()
     {
-        //GameManager.Instance.QuitToMainMenu();
+        PlayerInstance.Instance.gameObject.SetActive(false);
+        SceneManager.Instance.LoadScene("Cena_Main_Menu");
     }
 
     public override void Show()

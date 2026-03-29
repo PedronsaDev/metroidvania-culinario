@@ -103,6 +103,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &8602086368723778705
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -148,6 +149,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 5703528309638276700, guid: 6a6a26651a58145409804b21d0c1b9a6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -157,7 +159,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!95 &3485484053388154725
 Animator:
@@ -321,7 +322,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4f76fa1330b49b5944d99eaa40bb2d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Assets.Scripts.Drops.Dropper
-  _lootTable: {fileID: 11400000, guid: 795bf4b002318764eb6a6740027eb4ac, type: 2}
+  _lootTable: {fileID: 11400000, guid: dbf05f20f834b2345abb4f16ecd1d3ac, type: 2}
   _luckModifier: 0
   _dropOriginOverride: {fileID: 0}
   _dropOnDisable: 0

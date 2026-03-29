@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class PlayerPowerController : MonoBehaviour
 {
+    [SerializeField] private SpriteRenderer _hatSpriteRenderer;
+
     [Header("Equipped (Read Only)")]
     [SerializeField, ReadOnly] private PowerDefinition _equipped;
 
@@ -62,12 +64,13 @@ public class PlayerPowerController : MonoBehaviour
         _runtime?.FixedTick();
     }
 
-    private void Equip(PowerDefinition def)
+    public void Equip(PowerDefinition def)
     {
         _runtime = def.CreateRuntime(this);
         _equipped = def;
         def.OnEquip(this);
         _runtime.OnEquip();
+        _hatSpriteRenderer.sprite = def.HatSprite;
         PowerEquipped?.Invoke(def);
     }
 
@@ -79,6 +82,7 @@ public class PlayerPowerController : MonoBehaviour
             _runtime = null;
         }
 
+        _hatSpriteRenderer.sprite = null;
         _equipped?.OnUnequip(this);
         PowerUnequipped?.Invoke(_equipped);
         _equipped = null;

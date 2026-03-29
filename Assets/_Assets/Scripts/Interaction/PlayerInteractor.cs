@@ -96,6 +96,7 @@ public class PlayerInteractor : MonoBehaviour, IItemCollector
     public void AddItem(Item item, int quantity)
     {
         _inventory.AddItem(item, quantity);
+        item.OnPickup();
     }
     public GameObject GetInitiatorObject() => this.gameObject;
 }

@@ -7,4 +7,9 @@ public class Item : ScriptableObject
     public string DisplayName;
     [ShowAssetPreview] public Sprite Icon;
     public string Description;
+
+    public virtual void OnPickup()
+    {
+
+    }
 }

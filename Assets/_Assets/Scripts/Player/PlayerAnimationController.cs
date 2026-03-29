@@ -9,6 +9,7 @@ public class PlayerAnimationController : MonoBehaviour
     [SerializeField] private Animator _animator;
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private PlayerHealth _health;
+    [SerializeField] private PlayerAttack _attack;
 
     [Header("Thresholds")]
     [SerializeField] private float _movingSpeedThreshold = 0.1f;
@@ -58,6 +59,8 @@ public class PlayerAnimationController : MonoBehaviour
     private int _tJump;
     private int _tLand;
     private int _pSpeedX01;
+    private int _dead;
+    private int _attackTrigger;
 
     private float _smoothedAbsX;
 
@@ -92,6 +95,12 @@ public class PlayerAnimationController : MonoBehaviour
         if (_health)
         {
             _health.Damaged += OnDamaged;
+            _health.Death += OnDeath;
+        }
+        if (_attack)
+        {
+            _attack.AttackStarted += OnAttack;
+            _attack.AttackHit += OnAttackHit;
         }
     }
 
@@ -105,6 +114,13 @@ public class PlayerAnimationController : MonoBehaviour
         if (_health)
         {
             _health.Damaged -= OnDamaged;
+            _health.Death -= OnDeath;
+        }
+
+        if (_attack)
+        {
+            _attack.AttackStarted -= OnAttack;
+            _attack.AttackHit -= OnAttackHit;
         }
 
         if (_squashTween != null && _squashTween.IsActive())
@@ -112,6 +128,16 @@ public class PlayerAnimationController : MonoBehaviour
             _squashTween.Kill();
             TryRestoreScale();
         }
+    }
+
+    private void OnAttackHit(bool hit)
+    {
+
+    }
+
+    private void OnAttack()
+    {
+        _animator.SetTrigger(_attackTrigger);
     }
 
     private void CacheHashes()
@@ -125,11 +151,20 @@ public class PlayerAnimationController : MonoBehaviour
         _tJump = Animator.StringToHash("Jump");
         _tLand = Animator.StringToHash("Land");
         _pSpeedX01 = Animator.StringToHash("SpeedX01");
+        _dead = Animator.StringToHash("Dead");
+        _attackTrigger = Animator.StringToHash("Attack");
     }
 
     private void Update()
     {
         if (!_movement || !_animator) return;
+
+        if (_health.IsDead)
+        {
+            _animator.Play("Die");
+            _animator.SetBool(_dead, _health.IsDead);
+            return;
+        }
 
         float targetAbsX = Mathf.Abs(_movement.HorizontalSpeed);
         _smoothedAbsX = Mathf.Lerp(_smoothedAbsX, targetAbsX, 1f - Mathf.Pow(1f - Mathf.Clamp01(1f - _horizontalSmoothing), Time.deltaTime*60f));
@@ -191,6 +226,11 @@ public class PlayerAnimationController : MonoBehaviour
     private void OnDamaged()
     {
         DoSquash(_hitXMult, _hitYMult, _hitInDuration, _hitOutDuration, _hitInEase, _hitOutEase, _hitUnscaledTime);
+    }
+
+    private void OnDeath()
+    {
+
     }
 
     private void DoSquash(float xMult, float yMult, float inDuration, float outDuration, Ease inEase, Ease outEase, bool useUnscaled)

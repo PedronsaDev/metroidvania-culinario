@@ -7,6 +7,7 @@ public class PowerDefinition : ScriptableObject
     [TextArea] public string Description;
 
     [Header("Visual Settings")]
+    public Sprite HatSprite;
     public RuntimeAnimatorController AnimatorController;
     public Color ColorTint = Color.white;
 

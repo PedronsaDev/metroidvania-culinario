@@ -1,6 +1,7 @@
 using System.Collections;
 using _Assets.Scripts.Drops;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InteractableCookingStation : InteractableBase
 {
@@ -12,6 +13,10 @@ public class InteractableCookingStation : InteractableBase
     [Header("Cancellation")]
     [SerializeField] private float _cancelDistance = 2.5f;
     [SerializeField] private bool _cancelOnPlayerDisabled = true;
+
+    [Header("UI")]
+    [SerializeField] private GameObject _progressUI;
+    [SerializeField] private Image _progressFillImage;
 
     private bool _busy;
     private Coroutine _cookRoutine;
@@ -36,6 +41,12 @@ public class InteractableCookingStation : InteractableBase
         OnStationInteracted?.Invoke(this, _currentUser);
     }
 
+    private void Awake()
+    {
+        SetProgressVisible(false);
+        SetProgressUI(0f);
+    }
+
     public bool TryStartCooking(Recipe recipe, IInventory inventory)
     {
         if (_busy || !recipe || inventory == null)
@@ -49,6 +60,8 @@ public class InteractableCookingStation : InteractableBase
 
         _activeRecipe = recipe;
         _activeInventory = inventory;
+        SetProgressVisible(true);
+        SetProgressUI(0f);
         _cookRoutine = StartCoroutine(CookRoutine());
         return true;
     }
@@ -59,6 +72,8 @@ public class InteractableCookingStation : InteractableBase
             return;
         _activeRecipe = recipe;
         _activeInventory = inv;
+        SetProgressVisible(true);
+        SetProgressUI(0f);
         _cookRoutine = StartCoroutine(CookRoutine());
     }
 
@@ -66,9 +81,11 @@ public class InteractableCookingStation : InteractableBase
     {
         _busy = true;
         float elapsed = 0f;
+        float duration = Mathf.Max(0.0001f, _cookDuration);
+        SetProgressUI(0f);
         OnCookingStarted?.Invoke(this, _activeRecipe);
 
-        while (elapsed < _cookDuration)
+        while (elapsed < duration)
         {
             if (!IsUserStillValid())
             {
@@ -77,8 +94,11 @@ public class InteractableCookingStation : InteractableBase
             }
 
             elapsed += Time.deltaTime;
+            SetProgressUI(Mathf.Clamp01(elapsed / duration));
             yield return null;
         }
+
+        SetProgressUI(1f);
 
         var mgr = DropManager.GetOrCreate();
         mgr.StartDropSequence(_activeRecipe.ResultItem, _activeRecipe.ResultQuantity, transform.position);
@@ -109,6 +129,7 @@ public class InteractableCookingStation : InteractableBase
         }
 
         OnCookingCanceled?.Invoke(this, _activeRecipe);
+        SetProgressVisible(false);
 
         if (_autoReleaseIfInterrupted || internalCancel)
             ClearState();
@@ -121,11 +142,35 @@ public class InteractableCookingStation : InteractableBase
         _activeRecipe = null;
         _activeInventory = null;
         _busy = false;
+        SetProgressUI(0f);
+        SetProgressVisible(false);
+    }
+
+    private void SetProgressVisible(bool visible)
+    {
+        if (_progressUI != null)
+        {
+            _progressUI.SetActive(visible);
+            return;
+        }
+
+        if (_progressFillImage != null)
+            _progressFillImage.gameObject.SetActive(visible);
+    }
+
+    private void SetProgressUI(float normalized)
+    {
+        if (_progressFillImage == null)
+            return;
+
+        _progressFillImage.fillAmount = Mathf.Clamp01(normalized);
     }
 
     private void OnDisable()
     {
         if (_busy)
             CancelCooking();
+        else
+            SetProgressVisible(false);
     }
 }

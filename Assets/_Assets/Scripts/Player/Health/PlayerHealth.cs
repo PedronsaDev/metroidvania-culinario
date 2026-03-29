@@ -33,6 +33,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public bool Invulnerable => _invulnTimer > 0f || _invulnerableOverride;
     public int CurrentHealth => _currentHealth;
     public int MaxHealth => _maxHealth;
+    public bool IsDead => _dead;
 
     private void Awake()
     {
@@ -123,11 +124,15 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (_dead)
             return;
         _dead = true;
-        EndInvulnerability();
-
         HitPause.Instance?.Do(0.12f);
-
         Death?.Invoke();
+    }
+
+    public void Reset()
+    {
+        _dead = false;
+        EndInvulnerability();
+        SetHealth(_maxHealth);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

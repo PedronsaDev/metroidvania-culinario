@@ -57,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
     // Colliders temporarily ignored to allow drop-through
     private readonly List<Collider2D> _dropIgnored = new();
     private float _dropIgnoreUntil;
+    private PlayerHealth _health;
 
     public event Action Jumped;
     public event Action Landed;
@@ -83,6 +84,7 @@ public class PlayerMovement : MonoBehaviour
 
         _rb.gravityScale = 0f;
         _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        _health = GetComponent<PlayerHealth>();
     }
 
     private void OnEnable()
@@ -436,7 +438,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleGameplayBlock()
     {
-        bool blocked = UIManager.Instance && UIManager.Instance.IsGameplayBlocked;
+        bool blocked = UIManager.Instance && UIManager.Instance.IsGameplayBlocked || _health.IsDead;
         if (blocked == _inputsSuspended)
             return;
 
@@ -605,4 +607,5 @@ public class PlayerMovement : MonoBehaviour
         return col.GetComponent<PlatformEffector2D>();
     }
 }
+
 

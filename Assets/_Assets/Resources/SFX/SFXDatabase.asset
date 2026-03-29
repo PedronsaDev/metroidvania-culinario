@@ -65,7 +65,7 @@ MonoBehaviour:
     Clip: {fileID: 8300000, guid: b1e40b603673a33469f9c7d3b4686a60, type: 3}
     IsUI: 0
     Is3D: 0
-    DefaultVolume: 1
+    DefaultVolume: 0.4
     DefaultPitch: 1
     PitchVariance: 0.2
     VolumeVariance: 0
