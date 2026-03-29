@@ -1,4 +1,5 @@
-﻿using NaughtyAttributes;
+﻿using System.Collections;
+using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,7 @@ public class PlayerAttack : MonoBehaviour
 
     [Header("General")]
     [SerializeField, Range(0.02f, 0.6f)] private float _attackCooldown = 0.25f;
+    [SerializeField, Range(0f, 0.5f)] private float _attackHitDelay = 0.08f;
     [SerializeField] private int _damage = 1;
     [SerializeField] private LayerMask _hittableMask;
 
@@ -87,6 +89,7 @@ public class PlayerAttack : MonoBehaviour
     private Vector2 _lastAttackSize;
     private bool _lastAttackValid;
     private bool _canAttack = true;
+    private Coroutine _pendingAttackRoutine;
 
     private void Awake()
     {
@@ -118,6 +121,7 @@ public class PlayerAttack : MonoBehaviour
             _attackAction.started -= OnAttackStarted;
         Enable(_attackAction, false);
         Enable(_moveAction, false);
+        CancelPendingAttack();
     }
 
     private static void Enable(InputAction action, bool on)
@@ -178,7 +182,32 @@ public class PlayerAttack : MonoBehaviour
         AttackStarted?.Invoke();
         _attackVisualTimer = _debugAttackVisualTime;
 
+        CancelPendingAttack();
+
+        if (_attackHitDelay <= 0f)
+        {
+            ExecuteAttack(dir);
+            return;
+        }
+
+        _pendingAttackRoutine = StartCoroutine(ExecuteAttackWithDelay(dir));
+    }
+
+    private IEnumerator ExecuteAttackWithDelay(AttackDir dir)
+    {
+        yield return new WaitForSeconds(_attackHitDelay);
+        _pendingAttackRoutine = null;
+
+        if (!_canAttack || !isActiveAndEnabled)
+            yield break;
+
+        ExecuteAttack(dir);
+    }
+
+    private void ExecuteAttack(AttackDir dir)
+    {
         _lastAttackValid = false;
+
         switch (dir)
         {
             case AttackDir.Down:
@@ -192,6 +221,15 @@ public class PlayerAttack : MonoBehaviour
                 DoUpAttack();
                 break;
         }
+    }
+
+    private void CancelPendingAttack()
+    {
+        if (_pendingAttackRoutine == null)
+            return;
+
+        StopCoroutine(_pendingAttackRoutine);
+        _pendingAttackRoutine = null;
     }
 
     private void AllocateBuffer()
@@ -494,6 +532,7 @@ public class PlayerAttack : MonoBehaviour
     public void DisableAttack()
     {
         _canAttack = false;
+        CancelPendingAttack();
     }
 
     public void EnableAttack()
