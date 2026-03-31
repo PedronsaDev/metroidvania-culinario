@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ca35b9d470614d41b727d71ec369285, type: 3}
-  m_Name: test_item_3
+  m_Name: batata_ingrediente
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  DisplayName: Ovos
-  Icon: {fileID: 21300000, guid: 9eaa6d95a1d94ed41866b52732c3f08b, type: 3}
-  Description: Ovo frito, ai que delicia!
+  DisplayName: batata
+  Icon: {fileID: -8674460184485719504, guid: 865eb5bc0248ca54b90d0a06f79011a8, type: 3}
+  Description: batata que delicia
